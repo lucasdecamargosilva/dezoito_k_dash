@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pedidos | Calmo Store</title>
+    <link rel="icon" type="image/png"
+        href="https://acdn-us.mitiendanube.com/stores/876/722/themes/common/logo-1161005149-1766764306-50aea3deac95f007a091f5dac1e958341766764306-480-0.webp">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="theme-handler.js"></script>
+
+    <!-- ✅ NOVO: acabamento preto + ouro 18k (só para os novos cards/gráficos) -->
+
+
+
+</head>
+
+<body class="page-dashboard">
+    <div class="layout-wrapper">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <img src="https://acdn-us.mitiendanube.com/stores/876/722/themes/common/logo-1161005149-1766764306-50aea3deac95f007a091f5dac1e958341766764306-480-0.webp"
+                    alt="Logo" class="sidebar-logo" />
+                <button class="toggle-btn" id="toggleSidebar">
+                    <i class="ph ph-list"></i>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="crm.html" class="nav-link">
+                    <i class="ph-fill ph-users-three"></i>
+                    <span class="link-text">CRM</span>
+                </a>
+                <a href="conversas.html" class="nav-link">
+                    <i class="ph-fill ph-chat-circle-dots"></i>
+                    <span class="link-text">Conversas</span>
+                </a>
+                <a href="index.html" class="nav-link active">
+                    <i class="ph-fill ph-shopping-cart"></i>
+                    <span class="link-text">Pedidos</span>
+                </a>
+                <a href="ranking-produtos.html" class="nav-link">
+                    <i class="ph-fill ph-trophy"></i>
+                    <span class="link-text">Ranking de Produtos</span>
+                </a>
+                <a href="carrinhos-abandonados.html" class="nav-link">
+                    <i class="ph-fill ph-shopping-cart-simple"></i>
+                    <span class="link-text">Carrinhos Abandonados</span>
+                </a>
+                <a href="calculadora-custos.html" class="nav-link">
+                    <i class="ph-fill ph-calculator"></i>
+                    <span class="link-text">Calculadora de Custos</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="#" id="logout-btn" class="nav-link" style="color: #ff4d4d; margin-top: auto;">
+                    <i class="ph-fill ph-sign-out"></i>
+                    <span class="link-text">Sair da Conta</span>
+                </a>
+            </div>
+        </aside>
+
+        <div class="main-content">
+            <div class="app-container">
+                <header class="main-header">
+                    <div class="header-left">
+                        <h1 class="page-title">Painel de Pedidos</h1>
+                    </div>
+
+                    <div class="header-center">
+                        <div class="filter-group">
+                            <button class="period-btn" data-period="today">Hoje</button>
+                            <button class="period-btn active" data-period="7">7 Dias</button>
+                            <button class="period-btn" data-period="30">30 Dias</button>
+                            <button class="period-btn" data-period="all">Tudo</button>
+                            <button class="period-btn" data-period="custom">Personalizado</button>
+                        </div>
+                        <div id="custom-date-picker"
+                            style="display: none; align-items: center; gap: 8px; margin-left: 16px;">
+                            <input type="date" id="date-start" class="date-input">
+                            <span style="color: var(--accent-gray)">até</span>
+                            <input type="date" id="date-end" class="date-input">
+                            <button id="apply-custom-date" class="apply-btn">Aplicar</button>
+                        </div>
+                    </div>
+                </header>
+
+                <main class="dashboard-grid">
+                    <!-- KPI Dashboard Row -->
+                    <!-- Featured Financial KPIs Row -->
+                    <section class="kpi-grid"
+                        style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); margin-bottom: var(--spacing-lg);">
+                        <div class="card kpi-card"
+                            style="border-left: 4px solid var(--accent-green); background: linear-gradient(145deg, rgba(34, 197, 94, 0.05), transparent);">
+                            <div class="card-content">
+                                <span class="label" style="color: var(--accent-green);">Faturamento Total</span>
+                                <h3 id="top-revenue-value" class="value"
+                                    style="font-size: 42px; color: var(--text-white); text-shadow: 0 0 20px rgba(34, 197, 94, 0.2);">
+                                    <i class="ph-fill ph-currency-circle-dollar"
+                                        style="color: var(--accent-green);"></i>
+                                    <span>R$ 0,00</span>
+                                </h3>
+                                <span class="subtext">Faturamento bruto confirmado</span>
+                            </div>
+                        </div>
+
+                        <div class="card kpi-card"
+                            style="border-left: 4px solid var(--accent-yellow); background: linear-gradient(145deg, rgba(234, 179, 8, 0.05), transparent);">
+                            <div class="card-content">
+                                <span class="label" style="color: var(--accent-yellow);">Pagamentos Pendentes</span>
+                                <h3 id="top-pending-value" class="value"
+                                    style="font-size: 42px; color: var(--text-white); text-shadow: 0 0 20px rgba(234, 179, 8, 0.2);">
+                                    <i class="ph-fill ph-hourglass" style="color: var(--accent-yellow);"></i>
+                                    <span>R$ 0,00</span>
+                                </h3>
+                                <div id="top-pending-count" class="subtext"
+                                    style="font-weight: 600; color: var(--text-gray);"><i
+                                        class="ph-bold ph-receipt"></i> 0 pedidos aguardando</div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Operational KPI Group 1: General & Financial -->
+                    <section class="kpi-grid"
+                        style="grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px;">
+                        <div class="card kpi-card kpi-card-filter active-filter" id="card-filter-all"
+                            onclick="setRevenueFilter('all')" style="padding: 15px;">
+                            <div class="card-content">
+                                <span class="label" style="font-size: 12px;">Total Pedidos</span>
+                                <h3 id="kpi-total-orders" class="value text-info" style="font-size: 24px; gap: 8px;">
+                                    <i class="ph-fill ph-receipt" style="font-size: 20px;"></i>
+                                    <span>---</span>
+                                </h3>
+                                <span class="subtext" style="font-size: 11px;">(Confirmados, Pendentes e
+                                    Cancelados)</span>
+                            </div>
+                        </div>
+
+                        <div class="card kpi-card kpi-card-filter" id="card-filter-paid"
+                            onclick="setRevenueFilter('paid')" style="padding: 15px;">
+                            <div class="card-content">
+                                <span class="label" style="font-size: 12px;">Pedidos Pagos</span>
+                                <h3 id="kpi-paid-confirmed-orders" class="value text-success"
+                                    style="font-size: 24px; gap: 8px;">
+                                    <i class="ph-fill ph-check-circle" style="font-size: 20px;"></i>
+                                    <span>---</span>
+                                </h3>
+                                <span id="kpi-paid-confirmed-percent" class="subtext"
+                                    style="font-size: 11px;">---%</span>
+                                <span class="subtext" style="font-size: 11px; display: block;">(Desconsidera pedidos
+                                    cancelados)</span>
+                            </div>
+                        </div>
+
+                        <div class="card kpi-card kpi-card-filter" id="card-filter-pending"
+                            onclick="setRevenueFilter('pending')" style="padding: 15px;">
+                            <div class="card-content">
+                                <span class="label" style="font-size: 12px;">Pagamentos Pendentes</span>
+                                <h3 id="kpi-pending-status-orders" class="value text-warning"
+                                    style="font-size: 24px; gap: 8px;">
+                                    <i class="ph-fill ph-clock" style="font-size: 20px;"></i>
+                                    <span>---</span>
+                                </h3>
+                                <span id="kpi-pending-status-percent" class="subtext"
+                                    style="font-size: 11px;">---%</span>
+                                <span class="subtext" style="font-size: 11px; display: block;">(Apenas pedidos
+                                    abertos)</span>
+                            </div>
+                        </div>
+
+                        <div class="card kpi-card kpi-card-filter" id="card-filter-partial_refund"
+                            onclick="setRevenueFilter('partial_refund')" style="padding: 15px;">
+                            <div class="card-content">
+                                <span class="label" style="font-size: 12px;">Estornados / Parcial</span>
+                                <h3 id="kpi-refunded-total-value" class="value text-warning"
+                                    style="font-size: 24px; gap: 8px;">
+                                    <i class="ph-fill ph-circle-wavy-warning" style="font-size: 20px;"></i>
+                                    <span>---</span>
+                                </h3>
+                                <span id="kpi-refunded-combined-counts" class="subtext" style="font-size: 11px;">---
+                                    Estornados | --- Parciais</span>
+                            </div>
+                        </div>
+
+                        <div class="card kpi-card kpi-card-filter" id="card-filter-rejected"
+                            onclick="setRevenueFilter('rejected')" style="padding: 15px;">
+                            <div class="card-content">
+                                <span class="label" style="font-size: 12px;">Pagamento Recusado</span>
+                                <h3 id="kpi-rejected-status-orders" class="value text-danger"
+                                    style="font-size: 24px; gap: 8px;">
+                                    <i class="ph-fill ph-warning-circle" style="font-size: 20px;"></i>
+                                    <span>---</span>
+                                </h3>
+                                <span id="kpi-rejected-status-percent" class="subtext"
+                                    style="font-size: 11px;">---%</span>
+                            </div>
+                        </div>
+
+                        <div class="card kpi-card kpi-card-filter" id="card-filter-cancelled"
+                            onclick="setRevenueFilter('cancelled')" style="padding: 15px;">
+                            <div class="card-content">
+                                <span class="label" style="font-size: 12px;">Cancelados</span>
+                                <h3 id="kpi-cancelled-orders" class="value text-danger"
+                                    style="font-size: 24px; gap: 8px;">
+                                    <i class="ph-fill ph-x-circle" style="font-size: 20px;"></i>
+                                    <span>---</span>
+                                </h3>
+                                <div id="kpi-cancelled-percent" class="subtext" style="font-size: 11px;">---%</div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Operational KPI Group 2: Logistics -->
+                    <div class="section-header" style="margin: 30px 0 15px 0;">
+                        <h3
+                            style="font-size: 14px; font-weight: 700; color: #a3a3a3; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px;">
+                            <i class="ph-bold ph-truck" style="color: #facc15;"></i> Métricas de Logística
+                        </h3>
+                    </div>
+                    <section class="kpi-grid"
+                        style="grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: var(--spacing-lg);">
+                        <div class="card kpi-card kpi-card-filter" id="card-filter-to_send"
+                            onclick="setRevenueFilter('to_send')" style="padding: 15px;">
+                            <div class="card-content">
+                                <span class="label" style="font-size: 12px;">A enviar</span>
+                                <h3 id="kpi-to-send-orders" class="value text-warning"
+                                    style="font-size: 24px; gap: 8px;">
+                                    <i class="ph-fill ph-package" style="font-size: 20px;"></i>
+                                    <span>---</span>
+                                </h3>
+                                <span id="kpi-to-send-percent" class="subtext" style="font-size: 11px;">---%</span>
+                            </div>
+                        </div>
+
+
+                        <div class="card kpi-card kpi-card-filter" id="card-filter-shipped"
+                            onclick="setRevenueFilter('shipped')" style="padding: 15px;">
+                            <div class="card-content">
+                                <span class="label" style="font-size: 12px;">Enviados</span>
+                                <h3 id="kpi-shipped-orders" class="value text-purple"
+                                    style="font-size: 24px; gap: 8px;">
+                                    <i class="ph-fill ph-truck" style="font-size: 20px;"></i>
+                                    <span>---</span>
+                                </h3>
+                                <span id="kpi-shipped-percent" class="subtext" style="font-size: 11px;">---%</span>
+                            </div>
+                        </div>
+
+                        <div class="card kpi-card kpi-card-filter" id="card-filter-delivered"
+                            onclick="setRevenueFilter('delivered')" style="padding: 15px;">
+                            <div class="card-content">
+                                <span class="label" style="font-size: 12px;">Entregues</span>
+                                <h3 id="kpi-delivered-orders" class="value text-success"
+                                    style="font-size: 24px; gap: 8px;">
+                                    <i class="ph-fill ph-house-line" style="font-size: 20px;"></i>
+                                    <span>---</span>
+                                </h3>
+                                <span id="kpi-delivered-percent" class="subtext" style="font-size: 11px;">---%</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- New Revenue Evolution Section -->
+                    <section class="dashboard-grid" style="margin-bottom: var(--spacing-lg);">
+                        <div class="card chart-card" style="min-height: 400px;">
+                            <div class="card-header">
+                                <h3><i class="ph-fill ph-chart-line"></i> Evolução de Faturamento</h3>
+                            </div>
+                            <div class="chart-container" style="min-height: 300px;">
+                                <canvas id="chart-revenue-evolution"></canvas>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Charts Row 1 -->
+                    <section class="charts-row">
+                        <div class="card chart-card">
+                            <div class="card-header">
+                                <h3><i class="ph-fill ph-chart-pie"></i> Status do Pedido</h3>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="chart-order-status"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="card chart-card">
+                            <div class="card-header">
+                                <h3><i class="ph-fill ph-credit-card"></i> Status de Pagamento</h3>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="chart-payment-status"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="card chart-card">
+                            <div class="card-header">
+                                <h3><i class="ph-fill ph-package"></i> Status de Entrega</h3>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="chart-shipping-status"></canvas>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Charts Row 2 -->
+                    <section class="charts-row-large">
+                        <div class="card chart-card">
+                            <div class="card-header">
+                                <h3><i class="ph-fill ph-wallet"></i> Fontes de Pagamento</h3>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="chart-gateways"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="card chart-card">
+                            <div class="card-header">
+                                <h3><i class="ph-fill ph-map-pin"></i> Vendas por Região (Cidade)</h3>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="chart-regions"></canvas>
+                            </div>
+                        </div>
+                    </section>
+                </main>
+
+                <!-- ✅ NOVO: Painel de Lista de Pedidos -->
+                <section class="dashboard-grid" style="margin-top: 40px;">
+                    <div class="card chart-card" style="min-height: 500px;">
+                        <div class="card-header" style="flex-wrap: wrap; gap: 16px;">
+                            <h3><i class="ph-fill ph-list"></i> Lista de Pedidos <span id="orders-title-count"
+                                    style="font-size: 0.8em; opacity: 0.7; font-weight: 400; margin-left: 4px;">(0)</span>
+                            </h3>
+                            <div style="display: flex; gap: 12px; align-items: center; margin-left: auto;">
+                                <select id="shipping-filter" class="date-input"
+                                    style="height: 36px; padding: 0 12px; min-width: 140px;">
+                                    <option value="all" selected>Todos os Status</option>
+                                    <option value="não está embalado">A Enviar</option>
+                                    <option value="enviado">Enviados</option>
+                                    <option value="entregue">Entregues</option>
+                                </select>
+                                <div class="search-box" style="position: relative;">
+                                    <i class="ph ph-magnifying-glass"
+                                        style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-gray);"></i>
+                                    <input type="text" id="orders-search" placeholder="Pesquisar informações..."
+                                        class="date-input" style="padding-left: 36px; width: 280px; height: 36px;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table class="custom-table" id="orders-table">
+                                <thead>
+                                    <tr>
+                                        <th>Cliente</th>
+                                        <th>Email</th>
+                                        <th>WhatsApp</th>
+                                        <th>Data</th>
+                                        <th>Status do pedido</th>
+                                        <th>Cód. Rastreio</th>
+                                        <th>Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="orders-tbody">
+                                    <tr>
+                                        <td colspan="7"
+                                            style="text-align: center; padding: 40px; color: var(--text-muted);">
+                                            Carregando dados...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination -->
+                        <div class="pagination-container">
+                            <div class="pagination-info">Mostrando <span id="orders-range">0-0</span> de <span
+                                    id="total-orders-count">0</span></div>
+                            <div class="pagination-controls">
+                                <button class="pagination-arrow" id="prev-orders" disabled><i
+                                        class="ph ph-caret-left"></i></button>
+                                <div class="pagination-pages" id="orders-page-numbers"></div>
+                                <button class="pagination-arrow" id="next-orders" disabled><i
+                                        class="ph ph-caret-right"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <footer class="main-footer"
+                    style="margin-top: 80px; text-align: center; border-top: 1px solid var(--border-color); padding-top: 24px;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 8px; opacity: 0.9;">
+                        <span style="font-size: 13px; color: var(--text-muted); font-weight: 500;">Powered by</span>
+                        <img src="https://acdn-us.mitiendanube.com/stores/876/722/themes/common/logo-1161005149-1766764306-50aea3deac95f007a091f5dac1e958341766764306-480-0.webp"
+                            alt="Calmo Logo" style="height: 18px; object-fit: contain;">
+                    </div>
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Detalhes do Pedido -->
+    <div id="order-modal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title">Detalhes do Pedido</h3>
+                <button class="close-modal" onclick="closeOrderModal()">&times;</button>
+            </div>
+            <div class="modal-content">
+                <div class="order-detail-grid">
+                    <div class="detail-item">
+                        <label>Cliente</label>
+                        <span id="modal-customer-name">---</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Email</label>
+                        <span id="modal-customer-email">---</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>WhatsApp</label>
+                        <span id="modal-customer-phone">---</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Data do Pedido</label>
+                        <span id="modal-order-date">---</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Status de Pagamento</label>
+                        <span id="modal-payment-status">---</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Status de Entrega</label>
+                        <span id="modal-shipping-status">---</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Código de Rastreio</label>
+                        <span id="modal-tracking-code">---</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Cidade</label>
+                        <span id="modal-shipping-city">---</span>
+                    </div>
+                </div>
+
+                <div class="products-section">
+                    <h4>Produtos Adquiridos</h4>
+                    <div id="modal-products-list">
+                        <!-- Produtos serão inseridos aqui -->
+                    </div>
+                </div>
+
+                <div class="order-total-section">
+                    <div class="total-display">
+                        <div class="total-label">Total do Pedido</div>
+                        <div id="modal-order-total" class="total-value">R$ 0,00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        let supabaseClient;
+        let charts = {};
+        let currentPeriod = '7';
+        let allOrdersData = [];
+        let currentOrdersPage = 1;
+        const ordersPerPage = 10;
+
+        function initSupabase() {
+            if (window.supabase && window.SUPABASE_CONFIG) {
+                supabaseClient = window.supabase.createClient(
+                    window.SUPABASE_CONFIG.URL,
+                    window.SUPABASE_CONFIG.KEY
+                );
+                return true;
+            }
+            return false;
+        }
+
+        async function fetchDashboardData(period = '7', customStart = null, customEnd = null) {
+            if (!supabaseClient) return;
+            currentPeriod = period;
+
+            let startDate, endDate;
+            const now = new Date();
+            endDate = now.toISOString();
+
+            if (period === 'custom' && customStart && customEnd) {
+                // Ensure we use UTC to avoid local timezone shifts
+                startDate = `${customStart}T00:00:00.000Z`;
+                endDate = `${customEnd}T23:59:59.999Z`;
+            } else if (period === 'all') {
+                startDate = '2000-01-01T00:00:00Z';
+                endDate = now.toISOString();
+            } else if (period === 'today') {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                startDate = today.toISOString();
+                endDate = now.toISOString();
+            } else {
+                const days = parseInt(period);
+                const start = new Date();
+                start.setDate(now.getDate() - days);
+                startDate = start.toISOString();
+            }
+
+            try {
+                let allOrders = [];
+                let from = 0;
+                let to = 999;
+                let hasMore = true;
+
+                while (hasMore) {
+                    const { data, error } = await supabaseClient
+                        .from('calmo_orders')
+                        .select('*')
+                        .gte('created_at', startDate)
+                        .lte('created_at', endDate)
+                        .range(from, to);
+
+                    if (error) throw error;
+                    allOrders = [...allOrders, ...data];
+
+                    if (data.length < 1000) {
+                        hasMore = false;
+                    } else {
+                        from += 1000;
+                        to += 1000;
+                    }
+                }
+
+                allOrdersData = allOrders;
+                updateDashboard(allOrders);
+            } catch (error) {
+                console.error('Error fetching dashboard data:', error);
+            }
+        }
+
+        function updateDashboard(orders) {
+            const total = orders.length;
+
+            // Vendas: (Confirmado OU paid) E NÃO Cancelado/Estornado
+            const salesOrders = orders.filter(o => {
+                const payStatus = o.payment_status?.toLowerCase() || '';
+                const orderStatus = o.status?.toLowerCase() || '';
+                const isPaid = payStatus === 'confirmado' || payStatus === 'paid';
+
+                // Estrito: Qualquer menção a cancelamento ou estorno em qualquer coluna de status exclui do faturamento
+                const isCancelOrRefund =
+                    orderStatus.includes('cancel') || orderStatus.includes('estornado') || orderStatus.includes('refund') ||
+                    payStatus.includes('cancel') || payStatus.includes('estornado') || payStatus.includes('refund') || payStatus.includes('reembolsado');
+
+                return isPaid && !isCancelOrRefund;
+            });
+
+            const paidConfirmed = salesOrders.length;
+            const revenue = salesOrders.reduce((acc, curr) => acc + (parseFloat(curr.total) || 0), 0);
+
+            const toSendOrders = orders.filter(o => {
+                const payStatus = o.payment_status?.toLowerCase() || '';
+                const orderStatus = o.status?.toLowerCase() || '';
+                const shipStatus = o.shipping_status?.toLowerCase() || '';
+
+                const isPaid = payStatus === 'confirmado' || payStatus === 'paid';
+                const isCancelOrRefund =
+                    orderStatus.includes('cancel') || orderStatus.includes('estornado') || orderStatus.includes('refund') ||
+                    payStatus.includes('cancel') || payStatus.includes('estornado') || payStatus.includes('refund') || payStatus.includes('reembolsado');
+
+                const isSale = isPaid && !isCancelOrRefund;
+                const isUnpacked = shipStatus === 'não está embalado' || shipStatus === 'unpacked';
+                return isUnpacked && isSale;
+            });
+            const toSend = toSendOrders.length;
+
+            const shipped = orders.filter(o => {
+                const payStatus = o.payment_status?.toLowerCase() || '';
+                const orderStatus = o.status?.toLowerCase() || '';
+                const shipStatus = o.shipping_status?.toLowerCase() || '';
+
+                const isPaid = payStatus === 'confirmado' || payStatus === 'paid';
+                const isCancelOrRefund =
+                    orderStatus.includes('cancel') || orderStatus.includes('estornado') || orderStatus.includes('refund') ||
+                    payStatus.includes('cancel') || payStatus.includes('estornado') || payStatus.includes('refund') || payStatus.includes('reembolsado');
+
+                const isSale = isPaid && !isCancelOrRefund;
+                return isSale && (shipStatus === 'shipped' || shipStatus === 'enviado');
+            }).length;
+
+            const delivered = orders.filter(o => {
+                const payStatus = o.payment_status?.toLowerCase() || '';
+                const orderStatus = o.status?.toLowerCase() || '';
+                const shipStatus = o.shipping_status?.toLowerCase() || '';
+
+                const isPaid = payStatus === 'confirmado' || payStatus === 'paid';
+                const isCancelOrRefund =
+                    orderStatus.includes('cancel') || orderStatus.includes('estornado') || orderStatus.includes('refund') ||
+                    payStatus.includes('cancel') || payStatus.includes('estornado') || payStatus.includes('refund') || payStatus.includes('reembolsado');
+
+                const isSale = isPaid && !isCancelOrRefund;
+                return isSale && (shipStatus === 'delivered' || shipStatus === 'entregue');
+            }).length;
+
+            const cancelled = orders.filter(o => {
+                const s = o.status?.toLowerCase();
+                return s === 'cancelled' || s === 'cancelado';
+            }).length;
+
+            // Recusados: payment_status == 'recusado'
+            const rejectedStatus = orders.filter(o => {
+                const s = o.payment_status?.toLowerCase();
+                return s === 'recusado';
+            }).length;
+
+            const pendingOrders = orders.filter(o => {
+                const payStatus = o.payment_status?.toLowerCase();
+                const orderStatus = o.status?.toLowerCase();
+                const isPending = payStatus === 'pendente' || payStatus === 'pending';
+                return isPending && orderStatus !== 'cancelled' && orderStatus !== 'cancelado';
+            });
+            const pendingStatus = pendingOrders.length;
+            const pendingCount = pendingOrders.length;
+            const pendingSum = pendingOrders.reduce((acc, curr) => acc + (parseFloat(curr.total) || 0), 0);
+
+            // Estornados e Parcialmente Estornado
+            const totalRefundOrders = orders.filter(o => {
+                const ps = o.payment_status?.toLowerCase() || '';
+                const os = o.status?.toLowerCase() || '';
+                // Estorno total: status exato ou contém palavras chave mas não é parcial
+                return (ps === 'estornado' || ps === 'refunded' || ps === 'reembolsado' || os === 'estornado' || os === 'refunded') && !ps.includes('parcial');
+            });
+            const partialRefundOrders = orders.filter(o => {
+                const s = o.payment_status?.toLowerCase() || '';
+                return s.includes('parcialmente estornado');
+            });
+
+            const totalRefundCount = totalRefundOrders.length;
+            const partialRefundCount = partialRefundOrders.length;
+            const combinedRefundCount = totalRefundCount + partialRefundCount;
+
+            document.querySelector('#kpi-total-orders span').textContent = total;
+            document.querySelector('#top-revenue-value span').textContent = revenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            document.querySelector('#top-pending-value span').textContent = pendingSum.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            document.querySelector('#top-pending-count').innerHTML = `<i class="ph-bold ph-receipt"></i> ${pendingCount} pedidos aguardando`;
+
+            document.querySelector('#kpi-shipped-orders span').textContent = shipped;
+            document.getElementById('kpi-shipped-percent').textContent = total > 0 ? ((shipped / total) * 100).toFixed(1) + '% do total' : '0% do total';
+
+            document.querySelector('#kpi-to-send-orders span').textContent = toSend;
+            document.getElementById('kpi-to-send-percent').textContent = total > 0 ? ((toSend / total) * 100).toFixed(1) + '% do total' : '0% do total';
+
+            document.querySelector('#kpi-delivered-orders span').textContent = delivered;
+            document.getElementById('kpi-delivered-percent').textContent = total > 0 ? ((delivered / total) * 100).toFixed(1) + '% do total' : '0% do total';
+
+            document.querySelector('#kpi-cancelled-orders span').textContent = cancelled;
+            document.getElementById('kpi-cancelled-percent').textContent = total > 0 ? ((cancelled / total) * 100).toFixed(1) + '% do total' : '0% do total';
+
+            document.querySelector('#kpi-refunded-total-value span').textContent = combinedRefundCount;
+            document.getElementById('kpi-refunded-combined-counts').textContent = `${totalRefundCount} Estornados | ${partialRefundCount} Parciais`;
+
+            // New KPIs
+            document.querySelector('#kpi-paid-confirmed-orders span').textContent = paidConfirmed;
+            document.getElementById('kpi-paid-confirmed-percent').textContent = total > 0 ? ((paidConfirmed / total) * 100).toFixed(1) + '% do total' : '0% do total';
+
+            document.querySelector('#kpi-pending-status-orders span').textContent = pendingStatus;
+            document.getElementById('kpi-pending-status-percent').textContent = total > 0 ? ((pendingStatus / total) * 100).toFixed(1) + '% do total' : '0% do total';
+
+            document.querySelector('#kpi-rejected-status-orders span').textContent = rejectedStatus;
+            document.getElementById('kpi-rejected-status-percent').textContent = total > 0 ? ((rejectedStatus / total) * 100).toFixed(1) + '% do total' : '0% do total';
+
+
+
+            // Charts (Now dynamic based on user column requests)
+            renderRevenueChart(orders);
+            renderStatusChart(orders);
+            renderPaymentChart(orders);
+            renderShippingChart(orders);
+            renderGatewayChart(orders);
+            renderRegionChart(orders);
+            renderOrdersTable();
+        }
+
+        function formatBrasilianDate(dateStr) {
+            if (!dateStr) return 'N/A';
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return 'N/A';
+
+            // Usamos UTC para garantir que a data YYYY-MM-DD não sofra deslocamento de fuso
+            return date.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+        }
+
+        function cleanTrackingCode(trk) {
+            if (!trk) return '';
+            let s = String(trk).trim();
+            // Remove pattern like ="CODE"
+            if (s.startsWith('="') && s.endsWith('"')) {
+                s = s.substring(2, s.length - 1);
+            }
+            return s;
+        }
+
+        function formatPhone(phone) {
+            if (!phone) return 'N/A';
+            // Convert to string and handle potential .0 from numeric inputs
+            let str = String(phone).split('.')[0];
+            const cleaned = str.replace(/\D/g, '');
+
+            // Remove 55 if it's there at the start
+            let core = cleaned.startsWith('55') ? cleaned.substring(2) : cleaned;
+
+            if (core.length === 11) {
+                return `(${core.substring(0, 2)}) ${core.substring(2, 7)}-${core.substring(7)}`;
+            } else if (core.length === 10) {
+                return `(${core.substring(0, 2)}) ${core.substring(2, 6)}-${core.substring(6)}`;
+            }
+            return core;
+        }
+
+        function renderOrdersTable() {
+            const tbody = document.getElementById('orders-tbody');
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
+
+            const searchTerm = (document.getElementById('orders-search')?.value || '').toLowerCase();
+            const filterValue = document.getElementById('shipping-filter')?.value || 'all';
+
+            // Multi-camadas de filtragem
+            const filteredOrders = allOrdersData.filter(item => {
+                const trk = item.shipping_tracking_number || item.shipping_traking_number;
+                const shippingStatus = (item.shipping_status || '').toLowerCase();
+
+                // 1. Filtro por status de pedido (shipping_status)
+                if (filterValue !== 'all') {
+                    if (filterValue === 'enviado') {
+                        if (shippingStatus !== 'enviado' && shippingStatus !== 'shipped') return false;
+                    } else if (filterValue === 'entregue') {
+                        if (shippingStatus !== 'entregue' && shippingStatus !== 'delivered') return false;
+                    } else if (shippingStatus !== filterValue) {
+                        return false;
+                    }
+                }
+
+                // 2. Filtro por termo de pesquisa
+                if (searchTerm) {
+                    const searchable = [
+                        item.customer_name,
+                        item.customer_email,
+                        item.customer_phone,
+                        item.product_name,
+                        item.produtct_name,
+                        item.shipping_status,
+                        trk
+                    ].join(' ').toLowerCase();
+                    if (!searchable.includes(searchTerm)) return false;
+                }
+
+                return true;
+            });
+
+            // Agrupar pedidos por id_pedido (para consolidar produtos do mesmo pedido)
+            const groupedList = [];
+            const orderMap = new Map();
+
+            filteredOrders.forEach(item => {
+                // Tenta pegar o ID do pedido de várias formas possíveis
+                let orderId = item.id_pedido || item.id_order || item.order_id;
+
+                // Força string para evitar problemas de tipos diferentes no Map
+                let key;
+                if (orderId !== undefined && orderId !== null && String(orderId).trim() !== '') {
+                    key = String(orderId).trim();
+                } else {
+                    // Fallback para email + data se não houver ID
+                    const datePart = item.created_at ? new Date(item.created_at).toISOString().split('T')[0] : 'no-date';
+                    key = `${item.customer_email || 'sem-email'}_${datePart}`;
+                }
+
+                const pName = (item.product_name || item.produtct_name || 'Produto não especificado').trim();
+
+                // Limpeza básica do valor total (remove R$, espaços, etc para somar corretamente)
+                const parseTotal = (val) => {
+                    if (typeof val === 'number') return val;
+                    if (!val) return 0;
+                    return parseFloat(String(val).replace(/[^\d.,-]/g, '').replace(',', '.')) || 0;
+                };
+
+                const itemTotal = parseTotal(item.total);
+
+                if (orderMap.has(key)) {
+                    const existing = orderMap.get(key);
+                    // Adiciona o produto na lista deste pedido
+                    existing.all_products.push(pName);
+                    // Somar o total
+                    existing.calculated_total += itemTotal;
+                } else {
+                    // Criamos um novo objeto de pedido agrupado
+                    const newItem = {
+                        ...item,
+                        all_products: [pName],
+                        calculated_total: itemTotal
+                    };
+                    orderMap.set(key, newItem);
+                    groupedList.push(newItem);
+                }
+            });
+
+
+            const startIndex = (currentOrdersPage - 1) * ordersPerPage;
+            const endIndex = startIndex + ordersPerPage;
+            const paginatedData = groupedList.slice(startIndex, endIndex);
+
+            if (paginatedData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">Nenhum pedido compatível encontrado.</td></tr>';
+                return;
+            }
+
+            paginatedData.forEach(item => {
+                const tr = document.createElement('tr');
+
+                // Clean phone number for WhatsApp
+                const rawPhone = item.customer_phone || '';
+                const strPhone = String(rawPhone).split('.')[0];
+                const cleanPhone = strPhone.replace(/\D/g, '');
+                const formattedPhone = formatPhone(rawPhone);
+
+                const rawTrk = item.shipping_tracking_number || item.shipping_traking_number;
+                const cleanTrk = cleanTrackingCode(rawTrk);
+                const hasTracking = cleanTrk && cleanTrk.toLowerCase() !== 'null' && cleanTrk.trim() !== '';
+                const trackingCode = hasTracking ? cleanTrk : 'Não enviado';
+
+                const productName = item.product_name || item.produtct_name || 'N/A';
+                const customerName = item.customer_name || 'N/A';
+                const shipStatusRaw = item.shipping_status || 'Desconhecido';
+
+                let statusClass = 'text-muted';
+                let shipStatusDisp = shipStatusRaw;
+                if (shipStatusRaw.toLowerCase().includes('entregue') || shipStatusRaw.toLowerCase() === 'delivered') {
+                    statusClass = 'text-success';
+                    shipStatusDisp = 'Entregues';
+                } else if (shipStatusRaw.toLowerCase().includes('enviado') || shipStatusRaw.toLowerCase() === 'shipped') {
+                    statusClass = 'text-purple'; // Purple color for shipped status
+                    shipStatusDisp = 'Enviados';
+                } else if (shipStatusRaw.toLowerCase().includes('embalado')) {
+                    statusClass = 'text-warning';
+                    shipStatusDisp = 'A Enviar';
+                }
+
+                const formattedDate = formatBrasilianDate(item.created_at);
+
+                tr.onclick = (e) => {
+                    // Don't open modal if clicking the action button
+                    if (e.target.closest('.apply-btn')) return;
+                    openOrderModal(item);
+                };
+
+                const productDisplay = item.all_products.length > 1
+                    ? `${item.all_products[0]} (+${item.all_products.length - 1})`
+                    : item.all_products[0];
+
+                const message = `Olá ${customerName}, tudo bem? Sou da Calmo Store! 🌟\n\nPassando para informar que seu pedido dos produtos: *${item.all_products.join(', ')}* já foi processado. ✅\n\nSeu código de rastreio é: *${trackingCode}*\n\nVocê pode acompanhar a entrega através do site da transportadora. Qualquer dúvida, estamos à disposição!`;
+
+                const waLink = cleanPhone ? `https://wa.me/${cleanPhone.startsWith('55') ? cleanPhone : '55' + cleanPhone}?text=${encodeURIComponent(message)}` : '#';
+                const isAEnviar = shipStatusDisp === 'A Enviar';
+
+                tr.innerHTML = `
+                    <td>${customerName}</td>
+                    <td>${item.customer_email || 'N/A'}</td>
+                    <td style="white-space: nowrap;">${formattedPhone}</td>
+                    <td>${formattedDate}</td>
+                    <td><span class="${statusClass}" style="font-weight: 600; font-size: 13px;">${shipStatusDisp}</span></td>
+                    <td><span class="${trackingCode === 'Não enviado' ? '' : 'gold-pill'}" style="font-family: ${trackingCode === 'Não enviado' ? 'inherit' : 'monospace'}; font-size: 13px; color: ${trackingCode === 'Não enviado' ? 'rgba(255,255,255,0.4)' : 'inherit'};">${trackingCode}</span></td>
+                    <td>
+                        ${isAEnviar ? `
+                            <button class="apply-btn" disabled style="justify-content: center; gap: 8px; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.3); border: none; width: auto; font-size: 12px; padding: 0 16px; white-space: nowrap; font-weight: 700; cursor: not-allowed; opacity: 0.6;">
+                                <i class="ph-fill ph-whatsapp-logo"></i> Enviar Rastreio
+                            </button>
+                        ` : `
+                            <a href="${waLink}" target="_blank" class="apply-btn" style="text-decoration: none; justify-content: center; gap: 8px; background: #facc15; color: white; border: none; width: auto; font-size: 12px; padding: 0 16px; white-space: nowrap; font-weight: 700;">
+                                <i class="ph-fill ph-whatsapp-logo"></i> Enviar Rastreio
+                            </a>
+                        `}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Update Pagination UI
+            const total = groupedList.length;
+            const countEl = document.getElementById('orders-title-count');
+            if (countEl) countEl.textContent = `(${total})`;
+
+            const startRange = total === 0 ? 0 : startIndex + 1;
+            const endRange = Math.min(endIndex, total);
+
+            document.getElementById('orders-range').textContent = `${startRange}-${endRange}`;
+            document.getElementById('total-orders-count').textContent = total;
+
+            const prevBtn = document.getElementById('prev-orders');
+            const nextBtn = document.getElementById('next-orders');
+            if (prevBtn) prevBtn.disabled = currentOrdersPage === 1;
+            if (nextBtn) nextBtn.disabled = endIndex >= total;
+
+            const pageNumbers = document.getElementById('orders-page-numbers');
+            if (pageNumbers) {
+                pageNumbers.innerHTML = '';
+                const totalPages = Math.ceil(total / ordersPerPage);
+
+                if (totalPages > 1) {
+                    let pages = [];
+                    if (totalPages <= 5) {
+                        for (let i = 1; i <= totalPages; i++) pages.push(i);
+                    } else {
+                        if (currentOrdersPage <= 3) pages = [1, 2, 3, 4, totalPages];
+                        else if (currentOrdersPage >= totalPages - 2) pages = [1, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+                        else pages = [1, currentOrdersPage - 1, currentOrdersPage, currentOrdersPage + 1, totalPages];
+                    }
+
+                    pages.forEach((p, idx) => {
+                        if (idx > 0 && p - pages[idx - 1] > 1) {
+                            const dots = document.createElement('span');
+                            dots.textContent = '...';
+                            dots.style.opacity = '0.5';
+                            dots.style.padding = '0 8px';
+                            pageNumbers.appendChild(dots);
+                        }
+                        const btn = document.createElement('button');
+                        btn.className = `pagination-btn ${p === currentOrdersPage ? 'active' : ''}`;
+                        btn.textContent = p;
+                        btn.onclick = () => {
+                            currentOrdersPage = p;
+                            renderOrdersTable();
+                        };
+                        pageNumbers.appendChild(btn);
+                    });
+                }
+            }
+        }
+
+        let currentRevenueFilter = 'all';
+
+        function setRevenueFilter(status) {
+            currentRevenueFilter = status;
+
+            // Update UI
+            document.querySelectorAll('.kpi-card-filter').forEach(card => card.classList.remove('active-filter'));
+            const cardId = `card-filter-${status}`;
+            const card = document.getElementById(cardId);
+            if (card) card.classList.add('active-filter');
+
+            // Find current chart title element and update it
+            const chartTitle = document.querySelector('#chart-revenue-evolution').parentElement.previousElementSibling.querySelector('h3');
+            if (chartTitle) {
+                let suffix = '';
+                if (status === 'to_send') suffix = ' (A Enviar)';
+                else if (status === 'shipped') suffix = ' (Enviados)';
+                else if (status === 'delivered') suffix = ' (Entregues)';
+                else if (status === 'cancelled') suffix = ' (Cancelados)';
+                else if (status === 'paid') suffix = ' (Pagos)';
+                else if (status === 'pending') suffix = ' (Pendentes)';
+                else if (status === 'rejected') suffix = ' (Recusados)';
+                else if (status === 'partial_refund') suffix = ' (Estornados)';
+                else if (status === 'all') suffix = ' (Visão Geral)';
+
+                chartTitle.innerHTML = `<i class="ph-fill ph-chart-line"></i> Evolução de Faturamento${suffix}`;
+            }
+
+            renderRevenueChart(allOrdersData);
+        }
+
+        renderRevenueChart(allOrdersData);
+
+        function renderRevenueChart(orders) {
+            const ctx = document.getElementById('chart-revenue-evolution').getContext('2d');
+            if (charts.revenue) charts.revenue.destroy();
+
+            const statuses = [
+                { id: 'all', label: 'Total', color: '#3b82f6' },
+                { id: 'paid', label: 'Pagos', color: '#22c55e' },
+                { id: 'pending', label: 'Pendentes', color: '#f59e0b' },
+                { id: 'rejected', label: 'Recusados', color: '#ef4444' },
+                { id: 'to_send', label: 'A Enviar', color: '#eab308' },
+                { id: 'shipped', label: 'Enviados', color: '#facc15' },
+                { id: 'delivered', label: 'Entregues', color: '#10b981' },
+                { id: 'cancelled', label: 'Cancelados', color: '#ef4444' },
+                { id: 'partial_refund', label: 'Estornados', color: '#f59e0b' }
+            ];
+
+            const allDates = new Set();
+            const dataSetsMap = {};
+
+            statuses.forEach(s => {
+                dataSetsMap[s.id] = {};
+            });
+
+            orders.forEach(o => {
+                if (!o.created_at) return;
+                const dateObj = new Date(o.created_at);
+                if (isNaN(dateObj.getTime())) return;
+
+                let dateKey;
+                if (currentPeriod === 'all') {
+                    const m = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+                    const y = dateObj.getFullYear();
+                    dateKey = `${y}-${m}`;
+                } else {
+                    const d = dateObj.getDate().toString().padStart(2, '0');
+                    const m = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+                    const y = dateObj.getFullYear();
+                    dateKey = `${y}-${m}-${d}`;
+                }
+                allDates.add(dateKey);
+
+                const payStatus = (o.payment_status || '').toLowerCase();
+                const shipStatus = (o.shipping_status || '').toLowerCase();
+                const orderStatus = (o.status || '').toLowerCase();
+                const val = parseFloat(o.total) || 0;
+
+                // Venda (Vendas): (Confirmado ou paid) e não cancelado/estornado
+                const isPaid = payStatus === 'confirmado' || payStatus === 'paid';
+                const isCancelOrRefund =
+                    orderStatus.includes('cancel') || orderStatus.includes('estornado') || orderStatus.includes('refund') ||
+                    payStatus.includes('cancel') || payStatus.includes('estornado') || payStatus.includes('refund') || payStatus.includes('reembolsado');
+
+                const isSale = isPaid && !isCancelOrRefund;
+
+                // Recusado: payment_status == 'recusado'
+                const isRejected = payStatus === 'recusado';
+
+                // Cancelado: Qualquer variação de cancelado ou estornado
+                const isCancelled = isCancelOrRefund;
+
+                // All (Total order volume - no status filter)
+                dataSetsMap['all'][dateKey] = (dataSetsMap['all'][dateKey] || 0) + val;
+
+                // Specifics mapping to user's new rules
+                if (isSale) dataSetsMap['paid'][dateKey] = (dataSetsMap['paid'][dateKey] || 0) + val;
+
+                // Pendentes: Pagamento ('pendente' ou 'pending') E NÃO cancelado
+                const isPending = payStatus === 'pendente' || payStatus === 'pending';
+                if (isPending && !isCancelled) dataSetsMap['pending'][dateKey] = (dataSetsMap['pending'][dateKey] || 0) + val;
+
+                if (isRejected) dataSetsMap['rejected'][dateKey] = (dataSetsMap['rejected'][dateKey] || 0) + val;
+                if (isCancelled) dataSetsMap['cancelled'][dateKey] = (dataSetsMap['cancelled'][dateKey] || 0) + val;
+
+                // Refund data set (now includes both total and partial)
+                if (isCancelOrRefund && (orderStatus.includes('estornado') || orderStatus.includes('refund') || payStatus.includes('estornado') || payStatus.includes('refund') || payStatus.includes('reembolsado'))) {
+                    dataSetsMap['partial_refund'][dateKey] = (dataSetsMap['partial_refund'][dateKey] || 0) + val;
+                }
+
+                // Logistics still based on Sales status
+                const isUnpacked = shipStatus === 'não está embalado' || shipStatus === 'unpacked';
+                if (isSale && isUnpacked) dataSetsMap['to_send'][dateKey] = (dataSetsMap['to_send'][dateKey] || 0) + val;
+                if (isSale && (shipStatus === 'shipped' || shipStatus === 'enviado')) dataSetsMap['shipped'][dateKey] = (dataSetsMap['shipped'][dateKey] || 0) + val;
+                if (isSale && (shipStatus === 'delivered' || shipStatus === 'entregue')) dataSetsMap['delivered'][dateKey] = (dataSetsMap['delivered'][dateKey] || 0) + val;
+            });
+
+            const sortedDates = Array.from(allDates).sort();
+            const labels = sortedDates.map(key => {
+                const p = key.split('-');
+                if (p.length === 2) return `${p[1]}/${p[0]}`;
+                return `${p[2]}/${p[1]}`;
+            });
+
+            const datasets = statuses.map(s => {
+                const isHidden = currentRevenueFilter !== 'all' && currentRevenueFilter !== s.id;
+
+                return {
+                    label: s.label,
+                    data: sortedDates.map(date => dataSetsMap[s.id][date] || 0),
+                    borderColor: s.color,
+                    backgroundColor: 'transparent',
+                    borderWidth: currentRevenueFilter === s.id ? 4 : 2,
+                    pointBackgroundColor: s.color,
+                    pointRadius: currentRevenueFilter === s.id ? 5 : 3,
+                    tension: 0.4,
+                    hidden: isHidden // Oculta os outros dataset se um filtro específico estiver ativo, ou mostra tudo se 'all'
+                };
+            });
+
+            charts.revenue = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: { color: '#fff', usePointStyle: true, padding: 15 }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: (context) => {
+                                    return context.dataset.label + ': ' + context.parsed.y.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#fff',
+                                callback: (value) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })
+                            },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        },
+                        x: {
+                            ticks: { color: '#fff' },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function openOrderModal(order) {
+            const modal = document.getElementById('order-modal');
+            const formattedDate = formatBrasilianDate(order.created_at);
+
+            document.getElementById('modal-customer-name').textContent = order.customer_name || 'N/A';
+            document.getElementById('modal-customer-email').textContent = order.customer_email || 'N/A';
+            document.getElementById('modal-customer-phone').textContent = formatPhone(order.customer_phone);
+            document.getElementById('modal-order-date').textContent = formattedDate;
+            document.getElementById('modal-payment-status').textContent = (order.payment_status || 'N/A').toUpperCase();
+            document.getElementById('modal-shipping-status').textContent = (order.shipping_status || 'N/A').toUpperCase();
+            const rawTrk = order.shipping_tracking_number || order.shipping_traking_number;
+            const cleanTrk = cleanTrackingCode(rawTrk);
+            document.getElementById('modal-tracking-code').textContent = (cleanTrk && cleanTrk.toLowerCase() !== 'null') ? cleanTrk : 'Não disponível';
+            document.getElementById('modal-shipping-city').textContent = order.shipping_city || 'N/A';
+
+            const totalValue = order.calculated_total || parseFloat(order.total) || 0;
+            document.getElementById('modal-order-total').textContent = totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+            // Render Products
+            const productsList = document.getElementById('modal-products-list');
+            productsList.innerHTML = '';
+
+            console.log('[Modal] Abrindo pedido:', order);
+            console.log('[Modal] all_products:', order.all_products);
+
+            // Prioriza o array all_products criado no agrupamento
+            const products = order.all_products && order.all_products.length > 0
+                ? order.all_products
+                : [order.product_name || order.produtct_name || 'Produto não especificado'];
+
+            console.log('[Modal] Renderizando', products.length, 'produtos:', products);
+
+            products.forEach((pName, index) => {
+                const productItem = document.createElement('div');
+                productItem.className = 'product-item';
+                productItem.innerHTML = `
+                    <div class="product-info">
+                        <i class="ph-fill ph-package" style="font-size: 24px; color: #facc15;"></i>
+                        <span class="product-name">${pName}</span>
+                    </div>
+                `;
+                productsList.appendChild(productItem);
+                console.log(`[Modal] Produto ${index + 1} adicionado: ${pName}`);
+            });
+
+            modal.classList.add('active');
+
+            // Close modal when clicking outside
+            modal.onclick = (e) => {
+                if (e.target === modal) closeOrderModal();
+            };
+        }
+
+        function closeOrderModal() {
+            document.getElementById('order-modal').classList.remove('active');
+        }
+
+        function getChartColors() {
+            return {
+                primary: '#ffffff',
+                secondary: '#a3a3a3',
+                success: '#10b981',
+                warning: '#f59e0b',
+                danger: '#ef4444',
+                info: '#3b82f6',
+                grid: 'rgba(255, 255, 255, 0.1)',
+                text: '#ffffff'
+            }
+        }
+
+        function baseOptions() {
+            const colors = getChartColors();
+            return {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: colors.text, usePointStyle: true, padding: 20 }
+                    }
+                }
+            }
+        }
+
+        function renderStatusChart(orders) {
+            const ctx = document.getElementById('chart-order-status').getContext('2d');
+            if (charts.status) charts.status.destroy();
+
+            const map = {};
+            orders.forEach(o => {
+                let s = o.status?.toLowerCase();
+                if (!s || s === 'not-provided') s = 'Desconhecido';
+                else if (s === 'cancelled' || s === 'cancelado') s = 'Cancelado';
+                else if (s === 'pending' || s === 'pendente' || s === 'aberto' || s === 'open') s = 'Aberto';
+                else if (s === 'processing' || s === 'processando') s = 'Processando';
+                else if (s === 'completed' || s === 'concluido' || s === 'concluído') s = 'Concluído';
+                else s = s.charAt(0).toUpperCase() + s.slice(1);
+
+                map[s] = (map[s] || 0) + 1;
+            });
+
+            const labels = Object.keys(map);
+            const data = Object.values(map);
+
+            // Map colors based on label name
+            const backgroundColor = labels.map(label => {
+                const l = label.toLowerCase();
+                if (l === 'aberto' || l === 'em andamento') return '#facc15'; // Purple for open
+                if (l === 'concluído' || l === 'concluido') return '#22c55e'; // Green for completed
+                if (l === 'cancelado') return '#ef4444'; // Red for cancelled
+                if (l === 'pendente') return '#f59e0b'; // Orange for pending
+                if (l === 'processando') return '#3b82f6'; // Blue for processing
+                return '#facc15'; // Default Purple
+            });
+
+            charts.status = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: backgroundColor,
+                        borderColor: 'transparent',
+                        hoverOffset: 4
+                    }]
+                },
+                options: baseOptions()
+            });
+        }
+
+        function renderPaymentChart(orders) {
+            const ctx = document.getElementById('chart-payment-status').getContext('2d');
+            if (charts.payment) charts.payment.destroy();
+
+            const map = {};
+            orders.forEach(o => {
+                const payStatus = (o.payment_status || '').toLowerCase();
+                const orderStatus = (o.status || '').toLowerCase();
+
+                // Lógica de Venda Real
+                const isPaid = payStatus === 'confirmado' || payStatus === 'paid' || payStatus === 'pago' || payStatus === 'approved' || payStatus === 'aprovado';
+
+                // Identificação distinta
+                const isRefund =
+                    orderStatus.includes('estornado') || orderStatus.includes('refund') ||
+                    payStatus.includes('estornado') || payStatus.includes('refund') || payStatus.includes('reembolsado');
+
+                const isCancel = orderStatus.includes('cancel') || payStatus.includes('cancel');
+
+                let s;
+                if (isPaid && !isRefund && !isCancel) {
+                    s = 'Confirmado';
+                } else if (payStatus === 'pending' || payStatus === 'pendente') {
+                    s = 'Pendente';
+                } else if (payStatus.includes('parcialmente estornado')) {
+                    s = 'Parcialmente Estornado';
+                } else if (isRefund) {
+                    s = 'Estornado';
+                } else if (isCancel) {
+                    s = 'Cancelado';
+                } else if (payStatus === 'failed' || payStatus === 'falhou' || payStatus === 'recusado' || payStatus === 'rejected') {
+                    s = 'Recusado';
+                } else if (!payStatus || payStatus === 'not-provided') {
+                    s = 'Desconhecido';
+                } else {
+                    s = payStatus.charAt(0).toUpperCase() + payStatus.slice(1);
+                }
+
+                map[s] = (map[s] || 0) + 1;
+            });
+
+            const labels = Object.keys(map);
+            const data = Object.values(map);
+            const backgroundColor = labels.map(label => {
+                const l = label.toLowerCase();
+                if (l === 'confirmado') return '#22c55e'; // Green for confirmed
+                if (l === 'pendente') return '#facc15'; // Purple for pending
+                if (l === 'recusado') return '#ef4444'; // Red for declined
+                if (l === 'cancelado') return '#ef4444'; // Red for cancelled
+                if (l === 'estornado' || l === 'parcialmente estornado') return '#f59e0b'; // Orange for refunded
+                return '#facc15'; // Default Purple
+            });
+
+            charts.payment = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: backgroundColor,
+                        borderColor: 'transparent',
+                        hoverOffset: 4
+                    }]
+                },
+                options: baseOptions()
+            });
+        }
+
+        function renderShippingChart(orders) {
+            const ctx = document.getElementById('chart-shipping-status').getContext('2d');
+            if (charts.shipping) charts.shipping.destroy();
+
+            const map = {};
+            orders.forEach(o => {
+                const payStatus = (o.payment_status || '').toLowerCase();
+                const orderStatus = (o.status || '').toLowerCase();
+                const isPaid = payStatus === 'confirmado' || payStatus === 'paid';
+
+                const isCancelOrRefund =
+                    orderStatus.includes('cancel') || orderStatus.includes('estornado') || orderStatus.includes('refund') ||
+                    payStatus.includes('cancel') || payStatus.includes('estornado') || payStatus.includes('refund') || payStatus.includes('reembolsado');
+
+                const isSale = isPaid && !isCancelOrRefund;
+
+                let s = o.shipping_status?.toLowerCase();
+                if (!s || s === 'not-provided') {
+                    s = 'Desconhecido';
+                } else if (s === 'não está embalado' || s === 'unpacked') {
+                    if (!isSale) return; // Ignora se não for pago
+                    s = 'A Enviar';
+                } else if (s === 'shipped' || s === 'enviado') {
+                    if (!isSale) return; // Mantém consistência com vendas reais
+                    s = 'Enviados';
+                } else if (s === 'delivered' || s === 'entregue') {
+                    if (!isSale) return; // Mantém consistência com vendas reais
+                    s = 'Entregues';
+                } else {
+                    s = s.charAt(0).toUpperCase() + s.slice(1);
+                }
+
+                map[s] = (map[s] || 0) + 1;
+            });
+
+            const labels = Object.keys(map);
+            const data = Object.values(map);
+            const backgroundColor = labels.map(label => {
+                const l = label.toLowerCase();
+                if (l === 'a enviar') return '#ef4444'; // Red
+                if (l === 'enviados') return '#facc15'; // Purple
+                if (l === 'entregues') return '#22c55e'; // Green
+                return '#ffffff'; // Default White
+            });
+
+            charts.shipping = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: backgroundColor,
+                        borderColor: 'transparent',
+                        hoverOffset: 4
+                    }]
+                },
+                options: baseOptions()
+            });
+        }
+
+        function renderGatewayChart(orders) {
+            const gateMap = {};
+            orders.forEach(o => {
+                let name = o.payment_method;
+                if (!name || name === 'not-provided') name = 'Outras Fontes';
+                gateMap[name] = (gateMap[name] || 0) + 1;
+            });
+
+            const labels = Object.keys(gateMap);
+            const data = Object.values(gateMap);
+
+            const ctx = document.getElementById('chart-gateways').getContext('2d');
+            if (charts.gateways) charts.gateways.destroy();
+
+            // Dynamic colors based on payment method name
+            const backgroundColor = labels.map(label => {
+                const l = label.toLowerCase();
+                if (l.includes('mercado pago')) return '#3b82f6'; // Blue for Mercado Pago
+                if (l === 'outras fontes') return '#60a5fa'; // Light Blue for Outras Fontes
+                if (l.includes('pix')) return '#22c55e'; // Green for PIX
+                if (l.includes('cartão') || l.includes('cartao') || l.includes('credit')) return '#facc15'; // Purple for cards
+                if (l.includes('boleto')) return '#f59e0b'; // Orange for Boleto
+                return '#ef4444'; // Red for others
+            });
+
+            charts.gateways = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Pedidos',
+                        data: data,
+                        backgroundColor: backgroundColor,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    ...baseOptions(),
+                    scales: {
+                        y: { grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#fff' } },
+                        x: { grid: { display: false }, ticks: { color: '#fff' } }
+                    }
+                }
+            });
+        }
+
+        function renderRegionChart(orders) {
+            const regionMap = {};
+            orders.forEach(o => {
+                let city = o.shipping_city || 'Desconhecido';
+                regionMap[city] = (regionMap[city] || 0) + 1;
+            });
+
+            const sorted = Object.entries(regionMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
+            const labels = sorted.map(s => s[0]);
+            const data = sorted.map(s => s[1]);
+
+            const ctx = document.getElementById('chart-regions').getContext('2d');
+            if (charts.regions) charts.regions.destroy();
+
+            const chartColors = [
+                '#facc15', // Roxo Principal
+                '#3b82f6', // Azul Vibrante
+                '#22c55e', // Verde Sucesso
+                '#f59e0b', // Laranja Alerta
+                '#ec4899'  // Rosa Pink
+            ];
+
+            charts.regions = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Pedidos',
+                        data: data,
+                        backgroundColor: chartColors,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    ...baseOptions(),
+                    indexAxis: 'y',
+                    scales: {
+                        y: { grid: { display: false }, ticks: { color: '#fff' } },
+                        x: { grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#fff' } }
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (initSupabase()) {
+                fetchDashboardData('7');
+
+                // Real-time updates
+                supabaseClient
+                    .channel('calmo_orders_changes')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'calmo_orders' }, () => {
+                        const activeBtn = document.querySelector('.period-btn.active');
+                        if (activeBtn.dataset.period !== 'custom') {
+                            fetchDashboardData(activeBtn.dataset.period);
+                        }
+                    })
+                    .subscribe();
+            }
+
+            // Period buttons logic
+            document.querySelectorAll('.period-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+
+                    const period = this.dataset.period;
+                    const customPicker = document.getElementById('custom-date-picker');
+
+                    if (period === 'custom') {
+                        customPicker.style.display = 'flex';
+                    } else {
+                        customPicker.style.display = 'none';
+                        currentOrdersPage = 1;
+                        fetchDashboardData(period);
+                    }
+                });
+            });
+
+            // Listeners da Lista de Pedidos
+            document.getElementById('orders-search').addEventListener('input', () => {
+                currentOrdersPage = 1;
+                renderOrdersTable();
+            });
+
+            document.getElementById('shipping-filter').addEventListener('change', () => {
+                currentOrdersPage = 1;
+                renderOrdersTable();
+            });
+
+            // Pagination listeners
+            document.getElementById('prev-orders').addEventListener('click', () => {
+                if (currentOrdersPage > 1) {
+                    currentOrdersPage--;
+                    renderOrdersTable();
+                }
+            });
+
+            document.getElementById('next-orders').addEventListener('click', () => {
+                if ((currentOrdersPage * ordersPerPage) < allOrdersData.length) {
+                    currentOrdersPage++;
+                    renderOrdersTable();
+                }
+            });
+
+            // Apply custom date
+            document.getElementById('apply-custom-date').addEventListener('click', () => {
+                const start = document.getElementById('date-start').value;
+                const end = document.getElementById('date-end').value;
+                if (start && end) {
+                    fetchDashboardData('custom', start, end);
+                } else {
+                    alert('Por favor, selecione as duas datas.');
+                }
+            });
+
+            // Toggle sidebar (existing functionality)
+            const sidebar = document.getElementById('sidebar');
+            const toggleBtn = document.getElementById('toggleSidebar');
+            if (toggleBtn) {
+                toggleBtn.onclick = () => sidebar.classList.toggle('collapsed');
+            }
+        });
+    </script>
+</body>
+
+</html>

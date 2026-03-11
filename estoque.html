@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Estoque | Calmo Store</title>
+    <link rel="icon" type="image/png" href="https://acdn-us.mitiendanube.com/stores/876/722/themes/common/logo-1161005149-1766764306-50aea3deac95f007a091f5dac1e958341766764306-480-0.webp">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="theme-handler.js"></script>
+</head>
+
+<body class="page-dashboard">
+    <div class="layout-wrapper">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <img src="https://acdn-us.mitiendanube.com/stores/876/722/themes/common/logo-1161005149-1766764306-50aea3deac95f007a091f5dac1e958341766764306-480-0.webp"
+                    alt="Logo" class="sidebar-logo" />
+                <button class="toggle-btn" id="toggleSidebar">
+                    <i class="ph ph-list"></i>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="crm.html" class="nav-link">
+                    <i class="ph-fill ph-users-three"></i>
+                    <span class="link-text">CRM</span>
+                </a>
+                <a href="conversas.html" class="nav-link">
+                    <i class="ph-fill ph-chat-circle-dots"></i>
+                    <span class="link-text">Conversas</span>
+                </a>
+                <a href="index.html" class="nav-link">
+                    <i class="ph-fill ph-shopping-cart"></i>
+                    <span class="link-text">Pedidos</span>
+                </a>
+                <a href="ranking-produtos.html" class="nav-link">
+                    <i class="ph-fill ph-trophy"></i>
+                    <span class="link-text">Ranking de Produtos</span>
+                </a>
+                <a href="carrinhos-abandonados.html" class="nav-link">
+                    <i class="ph-fill ph-shopping-cart-simple"></i>
+                    <span class="link-text">Carrinhos Abandonados</span>
+                </a>
+                <a href="calculadora-custos.html" class="nav-link">
+                    <i class="ph-fill ph-calculator"></i>
+                    <span class="link-text">Calculadora de Custos</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="#" id="logout-btn" class="nav-link" style="color: #ff4d4d; margin-top: auto;">
+                    <i class="ph-fill ph-sign-out"></i>
+                    <span class="link-text">Sair da Conta</span>
+                </a>
+            </div>
+        </aside>
+
+        <div class="main-content">
+            <div class="app-container">
+                <header class="main-header">
+                    <div class="header-left">
+                        <h1 class="page-title">Controle de Estoque</h1>
+                    </div>
+                </header>
+
+                <main class="dashboard-grid">
+                    <section class="dashboard-grid">
+                        <div class="card chart-card">
+                            <div class="card-header"
+                                style="display: flex; justify-content: space-between; align-items: center;">
+                                <h3><i class="ph-fill ph-package"></i> Itens em Estoque</h3>
+                                <div class="header-center">
+                                    <select id="status-filter" class="crm-input-compact"
+                                        style="background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 12px;">
+                                        <option value="all">Todos os Status</option>
+                                        <option value="em_estoque">Em estoque (> 10)</option>
+                                        <option value="repor">Repor Estoque (1-10)</option>
+                                        <option value="fora">Fora de estoque (0)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="table-container">
+                                <table class="custom-table" id="stock-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="text-align: right; width: 120px;">ID do Produto</th>
+                                            <th>Produto</th>
+                                            <th style="text-align: right; width: 150px;">Estoque</th>
+                                            <th style="text-align: center; width: 180px;">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="stock-tbody">
+                                        <tr>
+                                            <td colspan="4"
+                                                style="text-align: center; padding: 40px; color: var(--text-muted);">
+                                                Carregando estoque...
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Pagination Controls (Advanced) -->
+                            <div class="pagination-controls"
+                                style="display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-top: 1px solid var(--border-color);">
+                                <span id="page-info"
+                                    style="color: var(--text-muted); font-size: 14px; font-weight: 500;">
+                                    Mostrando 0-0 de 0
+                                </span>
+
+                                <div class="pagination-buttons" style="display: flex; gap: 6px; align-items: center;">
+                                    <!-- Dynamic Buttons will be inserted here -->
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </main>
+
+                <footer class="main-footer"
+                    style="margin-top: 80px; text-align: center; border-top: 1px solid var(--border-color); padding-top: 24px;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 8px; opacity: 0.9;">
+                        <span style="font-size: 13px; color: var(--text-muted); font-weight: 500;">Powered by</span>
+                        <img src="https://acdn-us.mitiendanube.com/stores/876/722/themes/common/logo-1161005149-1766764306-50aea3deac95f007a091f5dac1e958341766764306-480-0.webp"
+                            alt="Calmo Logo" style="height: 18px; object-fit: contain;">
+                    </div>
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let supabaseClient;
+        let allStockItems = [];
+        let currentFilteredItems = [];
+        let currentPage = 1;
+        const ITEMS_PER_PAGE = 50;
+
+        function initSupabase() {
+            if (window.supabase && window.SUPABASE_CONFIG) {
+                supabaseClient = window.supabase.createClient(
+                    window.SUPABASE_CONFIG.URL,
+                    window.SUPABASE_CONFIG.KEY
+                );
+                return true;
+            }
+            return false;
+        }
+
+        async function fetchStockData() {
+            if (!supabaseClient) return;
+
+            const tbody = document.getElementById('stock-tbody');
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('cacife_estoque')
+                    .select('id, nome, estoque')
+                    .order('estoque', { ascending: false });
+
+                console.log('📦 Resposta do Supabase (Estoque):', data);
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px; color: var(--text-muted);">Nenhum item encontrado no estoque.</td></tr>';
+                    document.querySelector('.pagination-controls').style.display = 'none';
+                    return;
+                }
+
+                allStockItems = data;
+                document.querySelector('.pagination-controls').style.display = 'flex';
+                filterStock();
+
+            } catch (err) {
+                console.error('Erro ao buscar estoque:', err);
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px; color: var(--text-danger);">Erro ao carregar dados do estoque.</td></tr>';
+            }
+        }
+
+        function filterStock() {
+            const filterValue = document.getElementById('status-filter').value;
+
+            currentFilteredItems = allStockItems.filter(item => {
+                const qty = item.estoque !== null && item.estoque !== undefined ? item.estoque : 0;
+
+                if (filterValue === 'all') return true;
+                if (filterValue === 'fora') return qty === 0;
+                if (filterValue === 'repor') return qty >= 1 && qty <= 10;
+                if (filterValue === 'em_estoque') return qty > 10;
+                return true;
+            });
+
+            currentPage = 1;
+            renderPage();
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            renderPage();
+        }
+
+        function renderPage() {
+            const totalItems = currentFilteredItems.length;
+            const maxPage = Math.ceil(totalItems / ITEMS_PER_PAGE) || 1;
+
+            // Ensure bounds
+            if (currentPage < 1) currentPage = 1;
+            if (currentPage > maxPage) currentPage = maxPage;
+
+            const start = (currentPage - 1) * ITEMS_PER_PAGE;
+            const end = Math.min(start + ITEMS_PER_PAGE, totalItems);
+
+            // Data render
+            const pageData = currentFilteredItems.slice(start, end);
+            renderStockTable(pageData);
+
+            // Left text update
+            const startDisplay = totalItems === 0 ? 0 : start + 1;
+            document.getElementById('page-info').textContent = `Mostrando ${startDisplay}-${end} de ${totalItems}`;
+
+            renderPaginationButtons(maxPage);
+        }
+
+        function renderPaginationButtons(maxPage) {
+            const container = document.querySelector('.pagination-buttons');
+            container.innerHTML = '';
+
+            // Helper to create button
+            const createBtn = (text, page, isActive = false, isDisabled = false) => {
+                const btn = document.createElement('button');
+                btn.innerHTML = text; // allow HTML for icons
+
+                // Base styles
+                btn.style.minWidth = '32px';
+                btn.style.height = '32px';
+                btn.style.display = 'flex';
+                btn.style.alignItems = 'center';
+                btn.style.justifyContent = 'center';
+                btn.style.borderRadius = '6px';
+                btn.style.border = '1px solid var(--border-color)';
+                btn.style.background = 'rgba(255,255,255,0.05)';
+                btn.style.color = 'var(--text-white)';
+                btn.style.cursor = 'pointer';
+                btn.style.fontSize = '13px';
+                btn.style.transition = 'all 0.2s';
+                btn.style.padding = '0 6px';
+
+                if (isActive) {
+                    btn.style.background = '#8b5cf6'; // Purple highlight
+                    btn.style.borderColor = '#8b5cf6';
+                    btn.style.fontWeight = '600';
+                }
+
+                if (isDisabled) {
+                    btn.style.opacity = '0.5';
+                    btn.style.cursor = 'not-allowed';
+                    btn.disabled = true;
+                } else {
+                    btn.onclick = () => changePage(page);
+                }
+
+                return btn;
+            };
+
+            // Previous Button
+            container.appendChild(createBtn('<i class="ph ph-caret-left"></i>', currentPage - 1, false, currentPage === 1));
+
+            // Logic for ellipsis
+            // Always show 1
+            // Always show maxPage
+            // Show currentPage - 1, currentPage, currentPage + 1
+
+            const range = [];
+            const delta = 1;
+
+            for (let i = 1; i <= maxPage; i++) {
+                if (i === 1 || i === maxPage || (i >= currentPage - delta && i <= currentPage + delta)) {
+                    range.push(i);
+                }
+            }
+
+            let lastPage = 0;
+            range.forEach(i => {
+                if (lastPage > 0) {
+                    if (i - lastPage === 2) {
+                        // Gap is small, just fill it
+                        container.appendChild(createBtn(lastPage + 1, lastPage + 1, (lastPage + 1) === currentPage));
+                    } else if (i - lastPage > 2) {
+                        // Big gap, add ellipsis
+                        const dots = document.createElement('span');
+                        dots.textContent = '...';
+                        dots.style.color = 'var(--text-muted)';
+                        dots.style.padding = '0 4px';
+                        container.appendChild(dots);
+                    }
+                }
+                container.appendChild(createBtn(i, i, i === currentPage));
+                lastPage = i;
+            });
+
+            // Next Button
+            container.appendChild(createBtn('<i class="ph ph-caret-right"></i>', currentPage + 1, false, currentPage === maxPage));
+        }
+
+        function renderStockTable(data) {
+            const tbody = document.getElementById('stock-tbody');
+            tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px; color: var(--text-muted);">Nenhum produto corresponde ao filtro.</td></tr>';
+                return;
+            }
+
+            data.forEach(item => {
+                const tr = document.createElement('tr');
+                const qty = item.estoque !== null && item.estoque !== undefined ? item.estoque : 0;
+
+                let statusLabel = '';
+                let statusColor = '';
+                let statusBg = '';
+
+                // Logic requested by user based on quantity
+                if (qty === 0) {
+                    statusLabel = 'Fora de estoque';
+                    statusColor = '#ef4444'; // Red
+                    statusBg = 'rgba(239, 68, 68, 0.1)';
+                } else if (qty >= 1 && qty <= 10) {
+                    statusLabel = 'Repor Estoque';
+                    statusColor = '#f59e0b'; // Yellow
+                    statusBg = 'rgba(245, 158, 11, 0.1)';
+                } else {
+                    statusLabel = 'Em estoque';
+                    statusColor = '#22c55e'; // Green
+                    statusBg = 'rgba(34, 197, 94, 0.1)';
+                }
+
+                tr.innerHTML = `
+                    <td style="text-align: right; font-weight: 500; color: var(--text-gray);">${item.id || '#'}</td>
+                    <td style="font-weight: 500; color: var(--text-white);">${item.nome || 'Sem Nome'}</td>
+                    <td style="text-align: right; font-weight: 600; color: ${statusColor};">${qty.toLocaleString('pt-BR')}</td>
+                    <td style="text-align: center;">
+                        <span style="background: ${statusBg}; color: ${statusColor}; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; border: 1px solid ${statusColor}40;">
+                            ${statusLabel}
+                        </span>
+                    </td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebar = document.getElementById('sidebar');
+            const toggleBtn = document.getElementById('toggleSidebar');
+            if (toggleBtn) {
+                toggleBtn.onclick = () => sidebar.classList.toggle('collapsed');
+            }
+
+            if (initSupabase()) {
+                fetchStockData();
+            }
+
+            document.getElementById('status-filter').addEventListener('change', filterStock);
+        });
+    </script>
+</body>
+
+</html>
