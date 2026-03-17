@@ -3,6 +3,7 @@ const express = require('express');
 const axios = require('axios');
 const path = require('path');
 const { createProxyMiddleware } = require('http-proxy-middleware');
+const { runStartupSync, registerWebhooks } = require('./nuvemshop-sync');
 
 try {
     const app = express();
@@ -16,6 +17,8 @@ try {
         ? process.env.ALLOWED_ORIGINS.split(',')
         : ['http://localhost:3000', 'http://72.61.128.136:3000', 'https://cacife.quanticsolutions.com.br'];
 
+
+    app.use(express.json());
 
     app.use((req, res, next) => {
         const origin = req.headers.origin;
@@ -105,12 +108,16 @@ try {
     }));
 
     // Iniciar o servidor
-    app.listen(PORT, () => {
+    app.listen(PORT, async () => {
         console.log('--------------------------------------------------');
         console.log(`✅ Servidor Rodando na Porta: ${PORT}`);
         console.log(`🌍 Dashboard: http://localhost:${PORT}`);
         console.log(`💬 Chatwoot Tunnel: ${process.env.CHATWOOT_URL}`);
         console.log('--------------------------------------------------');
+
+        // Nuvemshop: sync histórico inicial + registro de webhooks apontando para o n8n
+        await runStartupSync();
+        await registerWebhooks();
     });
 
 } catch (e) {

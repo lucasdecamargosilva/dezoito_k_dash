@@ -1,0 +1,166 @@
+{
+  "name": "Nuvemshop - Sync Periódico (15min)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "minutes", "minutesInterval": 15 }]
+        }
+      },
+      "id": "c3d4e5f6-0003-0003-0001-c3d4e5f6a1b2",
+      "name": "A cada 15 minutos",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.tiendanube.com/v1/854068/orders",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "per_page", "value": "50" },
+            { "name": "page", "value": "1" },
+            { "name": "sort_by", "value": "updated_at-desc" }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authentication", "value": "bearer 3a8b9056e23fb7e728b6ab130ae6b054824ee0a9" },
+            { "name": "User-Agent", "value": "Dezoito K Dashboard (dezoitoktijoux@gmail.com)" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c3d4e5f6-0003-0003-0002-c3d4e5f6a1b2",
+      "name": "Buscar Pedidos Nuvemshop",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => {\n  const order = item.json;\n  const customer = order.customer || {};\n  const products = order.products || [];\n  const payment = order.payment_details || {};\n\n  const productName = products.map(p => {\n    const name = p.name;\n    if (typeof name === 'object') return name.pt || name.es || name.en || Object.values(name)[0] || '';\n    return name || '';\n  }).join(', ');\n  const productPrice = products.map(p => p.price || '0').join(', ');\n  const quantityBuyed = products.map(p => p.quantity || 1).join(', ');\n\n  return {\n    json: {\n      id_pedido: order.id,\n      nuvemshop_id: String(order.id),\n      customer_id: customer.id || null,\n      customer_name: customer.name || order.contact_name || '',\n      customer_email: order.contact_email || customer.email || '',\n      customer_phone: order.contact_phone || '',\n      contact_identification: order.contact_identification || '',\n      status: order.status || '',\n      payment_status: order.payment_status || '',\n      shipping_status: order.shipping_status || '',\n      created_at: order.created_at || null,\n      updated_at: order.updated_at || null,\n      completed_at: (order.completed_at && order.completed_at.date) || null,\n      paid_at: order.paid_at || null,\n      cancelled_at: order.cancelled_at || null,\n      closed_at: order.closed_at || null,\n      read_at: order.read_at || null,\n      subtotal: parseFloat(order.subtotal) || 0,\n      discount: parseFloat(order.discount) || 0,\n      discount_coupon: order.discount_coupon || null,\n      discount_gateway: parseFloat(order.discount_gateway) || 0,\n      total: parseFloat(order.total) || 0,\n      total_usd: parseFloat(order.total_usd) || 0,\n      total_paid_by_customer: parseFloat(order.total_paid_by_customer) || null,\n      currency: order.currency || 'BRL',\n      gateway: order.gateway || '',\n      gateway_name: order.gateway_name || '',\n      gateway_id: order.gateway_id || '',\n      gateway_link: order.gateway_link || null,\n      payment_method: payment.method || '',\n      payment_cc_company: payment.credit_card_company || null,\n      payment_installments: payment.installments ? parseInt(payment.installments) : null,\n      shipping_name: order.shipping_name || order.billing_name || '',\n      shipping_phone: order.shipping_phone || '',\n      shipping_address: order.shipping_address || '',\n      shipping_number: order.shipping_number || '',\n      shipping_floor: order.shipping_floor || '',\n      shipping_locality: order.shipping_locality || '',\n      shipping_zipcode: order.shipping_zipcode || '',\n      shipping_city: order.shipping_city || '',\n      shipping_province: order.shipping_province || '',\n      shipping_country: order.shipping_country || '',\n      billing_name: order.billing_name || '',\n      billing_phone: order.billing_phone || '',\n      billing_address: order.billing_address || '',\n      billing_number: order.billing_number || '',\n      billing_floor: order.billing_floor || '',\n      billing_locality: order.billing_locality || '',\n      billing_zipcode: order.billing_zipcode || '',\n      billing_city: order.billing_city || '',\n      billing_province: order.billing_province || '',\n      billing_country: order.billing_country || '',\n      same_billing_and_shipping: order.same_billing_and_shipping_address || false,\n      shipping_option_name: order.shipping_option || '',\n      shipping_carrier_name: order.shipping_carrier_name || '',\n      shipping_consumer_cost: parseFloat(order.shipping_cost_customer) || 0,\n      shipping_merchant_cost: parseFloat(order.shipping_cost_owner) || 0,\n      shipping_tracking_number: order.shipping_tracking_number || null,\n      shipping_tracking_url: order.shipping_tracking_url || null,\n      storefront: order.storefront || null,\n      note: order.note || null,\n      owner_note: order.owner_note || null,\n      client_browser_ip: (order.client_details && order.client_details.browser_ip) || null,\n      client_user_agent: (order.client_details && order.client_details.user_agent) || null,\n      app_id: order.app_id || null,\n      product_name: productName,\n      product_price: productPrice,\n      quantity_buyed: quantityBuyed\n    }\n  };\n});"
+      },
+      "id": "c3d4e5f6-0003-0003-0003-c3d4e5f6a1b2",
+      "name": "Mapear Pedidos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [710, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://jytsrxrmgvliyyuktxsd.supabase.co/rest/v1/dezoito_orders?on_conflict=nuvemshop_id",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "COLE_SERVICE_ROLE_KEY_AQUI" },
+            { "name": "Authorization", "value": "Bearer COLE_SERVICE_ROLE_KEY_AQUI" },
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Prefer", "value": "resolution=merge-duplicates,return=minimal" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "string",
+        "body": "={{ JSON.stringify($input.all().map(i => i.json)) }}",
+        "options": {}
+      },
+      "id": "c3d4e5f6-0003-0003-0004-c3d4e5f6a1b2",
+      "name": "Supabase - Upsert Pedidos",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [940, 200]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.tiendanube.com/v1/854068/checkouts",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "per_page", "value": "50" },
+            { "name": "page", "value": "1" },
+            { "name": "sort_by", "value": "updated_at-desc" }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authentication", "value": "bearer 3a8b9056e23fb7e728b6ab130ae6b054824ee0a9" },
+            { "name": "User-Agent", "value": "Dezoito K Dashboard (dezoitoktijoux@gmail.com)" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c3d4e5f6-0003-0003-0005-c3d4e5f6a1b2",
+      "name": "Buscar Carrinhos Nuvemshop",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 460]
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => {\n  const checkout = item.json;\n  const payment = checkout.payment_details || {};\n  return {\n    json: {\n      id: checkout.id,\n      nuvemshop_id: String(checkout.id),\n      token: checkout.token || null,\n      store_id: checkout.store_id || null,\n      abandoned_checkout_url: checkout.abandoned_checkout_url || null,\n      contact_email: checkout.contact_email || '',\n      contact_name: checkout.contact_name || '',\n      contact_phone: checkout.contact_phone || '',\n      contact_identification: checkout.contact_identification || '',\n      contact_accepts_marketing: checkout.contact_accepts_marketing || false,\n      contact_accepts_marketing_updated_at: checkout.contact_accepts_marketing_updated_at || null,\n      shipping_name: checkout.shipping_name || '',\n      shipping_phone: checkout.shipping_phone || '',\n      shipping_address: checkout.shipping_address || '',\n      shipping_number: checkout.shipping_number || '',\n      shipping_floor: checkout.shipping_floor || '',\n      shipping_locality: checkout.shipping_locality || '',\n      shipping_zipcode: checkout.shipping_zipcode || '',\n      shipping_city: checkout.shipping_city || '',\n      shipping_province: checkout.shipping_province || '',\n      shipping_country: checkout.shipping_country || '',\n      billing_name: checkout.billing_name || '',\n      billing_phone: checkout.billing_phone || '',\n      billing_address: checkout.billing_address || '',\n      billing_number: checkout.billing_number || '',\n      billing_floor: checkout.billing_floor || '',\n      billing_locality: checkout.billing_locality || '',\n      billing_zipcode: checkout.billing_zipcode || '',\n      billing_city: checkout.billing_city || '',\n      billing_province: checkout.billing_province || '',\n      billing_country: checkout.billing_country || '',\n      subtotal: parseFloat(checkout.subtotal) || 0,\n      discount: parseFloat(checkout.discount) || 0,\n      discount_coupon: parseFloat(checkout.discount_coupon) || null,\n      discount_gateway: parseFloat(checkout.discount_gateway) || null,\n      total: parseFloat(checkout.total) || 0,\n      total_usd: parseFloat(checkout.total_usd) || null,\n      currency: checkout.currency || 'BRL',\n      weight: parseFloat(checkout.weight) || null,\n      payment_status: checkout.payment_status || '',\n      payment_method: payment.method || '',\n      payment_installments: payment.installments ? parseInt(payment.installments) : null,\n      payment_credit_card_company: payment.credit_card_company || null,\n      gateway: checkout.gateway || '',\n      gateway_name: checkout.gateway_name || '',\n      checkout_enabled: checkout.checkout_enabled || false,\n      checkout_bot_suspect: checkout.checkout_bot_suspect || false,\n      has_stock_available: checkout.has_stock_available || null,\n      was_notified: checkout.was_notified || false,\n      language: checkout.language || '',\n      storefront: checkout.storefront || null,\n      same_billing_and_shipping_address: checkout.same_billing_and_shipping_address || false,\n      utm_source: checkout.utm_source || null,\n      utm_medium: checkout.utm_medium || null,\n      utm_campaign: checkout.utm_campaign || null,\n      utm_content: checkout.utm_content || null,\n      utm_term: checkout.utm_term || null,\n      landing_page: checkout.landing_page || null,\n      customer_visit_created_at: checkout.customer_visit_created_at || null,\n      created_at: checkout.created_at || null,\n      updated_at: checkout.updated_at || null,\n      completed_at: checkout.completed_at || null,\n      owner_note: checkout.owner_note || null,\n      order_origin: checkout.order_origin || null\n    }\n  };\n});"
+      },
+      "id": "c3d4e5f6-0003-0003-0006-c3d4e5f6a1b2",
+      "name": "Mapear Carrinhos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [710, 460]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://jytsrxrmgvliyyuktxsd.supabase.co/rest/v1/abandoned_checkouts_dezoito?on_conflict=nuvemshop_id",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "COLE_SERVICE_ROLE_KEY_AQUI" },
+            { "name": "Authorization", "value": "Bearer COLE_SERVICE_ROLE_KEY_AQUI" },
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Prefer", "value": "resolution=merge-duplicates,return=minimal" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "string",
+        "body": "={{ JSON.stringify($input.all().map(i => i.json)) }}",
+        "options": {}
+      },
+      "id": "c3d4e5f6-0003-0003-0007-c3d4e5f6a1b2",
+      "name": "Supabase - Upsert Carrinhos",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [940, 460]
+    }
+  ],
+  "connections": {
+    "A cada 15 minutos": {
+      "main": [
+        [
+          { "node": "Buscar Pedidos Nuvemshop", "type": "main", "index": 0 },
+          { "node": "Buscar Carrinhos Nuvemshop", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Buscar Pedidos Nuvemshop": {
+      "main": [[{ "node": "Mapear Pedidos", "type": "main", "index": 0 }]]
+    },
+    "Mapear Pedidos": {
+      "main": [[{ "node": "Supabase - Upsert Pedidos", "type": "main", "index": 0 }]]
+    },
+    "Buscar Carrinhos Nuvemshop": {
+      "main": [[{ "node": "Mapear Carrinhos", "type": "main", "index": 0 }]]
+    },
+    "Mapear Carrinhos": {
+      "main": [[{ "node": "Supabase - Upsert Carrinhos", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "tags": []
+}

@@ -1,6 +1,6 @@
 
 // sync-orders.js
-// Logic to automatically sync orders from 'calmo_orders' to 'opportunities'
+// Logic to automatically sync orders from 'dezoito_orders' to 'opportunities'
 
 async function syncOrdersToCRM() {
     if (!window.CRM_LOGIC || !window.supabase) {
@@ -21,7 +21,7 @@ async function syncOrdersToCRM() {
         if (window.showToast) window.showToast("Iniciando sincronização de pedidos...", "info");
 
         const { data: orders, error } = await client
-            .from('calmo_orders')
+            .from('dezoito_orders')
             .select('*')
             .gte('created_at', startDate.toISOString());
 

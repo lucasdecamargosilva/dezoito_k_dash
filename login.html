@@ -4,12 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | Calmo Store</title>
+    <title>Login | Dezoito K</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400;1,9..144,500&family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700&display=swap"
         rel="stylesheet">
 
     <!-- Icons -->
@@ -20,101 +20,124 @@
 
     <style>
         body {
-            background-color: #000;
+            background-color: #070605;
+            background-image:
+                radial-gradient(ellipse 80% 60% at 30% 40%, rgba(201, 162, 39, 0.04) 0%, transparent 55%),
+                radial-gradient(ellipse 60% 80% at 75% 75%, rgba(201, 162, 39, 0.025) 0%, transparent 55%);
             display: flex;
             align-items: center;
             justify-content: center;
             height: 100vh;
             margin: 0;
             overflow: hidden;
+            font-family: 'Bricolage Grotesque', 'Helvetica Neue', sans-serif;
         }
 
         .login-card {
-            background: #0a0a0a;
-            /* var(--bg-card) */
-            border: 1px solid #262626;
-            /* var(--border-color) */
-            padding: 40px;
-            /* var(--spacing-xl) */
+            background: #0d0c0a;
+            border: 1px solid #1e1c17;
+            box-shadow: 0 0 0 1px rgba(201, 162, 39, 0.1), 0 32px 64px rgba(0, 0, 0, 0.6);
+            padding: 44px 40px;
             border-radius: 16px;
-            /* var(--radius-lg) */
             width: 100%;
             max-width: 400px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
             text-align: center;
             position: relative;
             z-index: 2;
+            animation: loginReveal 0.6s cubic-bezier(0.23, 1, 0.32, 1) both;
+        }
+
+        @keyframes loginReveal {
+            from { opacity: 0; transform: translateY(16px) scale(0.98); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* gold shimmer top edge */
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(201, 162, 39, 0.5), transparent);
+            border-radius: 16px 16px 0 0;
         }
 
         .login-logo {
-            height: 60px;
-            margin-bottom: 32px;
+            height: 58px;
+            margin-bottom: 36px;
             display: inline-block;
+            filter: brightness(1.05);
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             text-align: left;
         }
 
         .form-label {
             display: block;
-            margin-bottom: 8px;
-            color: #a3a3a3;
-            /* var(--text-gray) */
-            font-size: 14px;
-            font-weight: 500;
+            margin-bottom: 7px;
+            color: #8a847a;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.6px;
         }
 
         .form-input {
             width: 100%;
             padding: 12px 16px;
-            background: #111;
-            border: 1px solid #333;
+            background: #0a0907;
+            border: 1px solid #1e1c17;
             border-radius: 8px;
-            /* var(--radius-sm) */
-            color: #fff;
-            font-family: 'Outfit', sans-serif;
-            font-size: 15px;
-            transition: all 0.2s;
+            color: #f0ebe0;
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: 14px;
+            transition: all 0.2s ease;
             outline: none;
         }
 
         .form-input:focus {
-            border-color: #fff;
-            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+            border-color: rgba(201, 162, 39, 0.35);
+            box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.07);
+        }
+
+        .form-input::placeholder {
+            color: #514d48;
         }
 
         .btn-login {
             width: 100%;
-            padding: 14px;
-            background: #facc15;
-            color: #000;
+            padding: 13px;
+            background: #c9a227;
+            color: #0a0907;
             border: none;
             border-radius: 8px;
-            /* var(--radius-sm) */
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 700;
+            font-family: 'Bricolage Grotesque', sans-serif;
+            letter-spacing: 0.3px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
             margin-top: 10px;
         }
 
         .btn-login:hover {
-            background: #e5e5e5;
+            background: #e8c97e;
             transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(201, 162, 39, 0.25);
         }
 
         .btn-login:disabled {
-            opacity: 0.7;
+            opacity: 0.65;
             cursor: not-allowed;
+            transform: none;
         }
 
         .error-msg {
-            color: #ff4d4d;
-            /* var(--accent-red) */
-            font-size: 13px;
-            margin-top: 16px;
+            color: #f48771;
+            font-size: 12.5px;
+            margin-top: 14px;
             min-height: 20px;
             opacity: 0;
             transition: opacity 0.3s;
@@ -124,12 +147,11 @@
             opacity: 1;
         }
 
-        /* Background animated elements */
         .bg-glow {
             position: absolute;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0) 70%);
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(201, 162, 39, 0.04) 0%, transparent 65%);
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
@@ -145,7 +167,7 @@
 
     <div class="login-card">
         <img src="logo.png"
-            alt="Calmo Store" class="login-logo">
+            alt="Dezoito K" class="login-logo">
 
         <form id="login-form">
             <div class="form-group">

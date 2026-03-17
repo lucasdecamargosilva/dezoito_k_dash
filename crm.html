@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRM | Calmo Store</title>
+    <title>CRM | Dezoito K</title>
 
     <!-- Favicons / theme -->
     <link rel="icon"
@@ -14,7 +14,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400;1,9..144,500&family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 
     <!-- Supabase Core & Configuration -->
@@ -603,10 +603,6 @@
                     <i class="ph-fill ph-shopping-cart-simple"></i>
                     <span class="link-text">Carrinhos Abandonados</span>
                 </a>
-                <a href="calculadora-custos.html" class="nav-link">
-                    <i class="ph-fill ph-calculator"></i>
-                    <span class="link-text">Calculadora de Custos</span>
-                </a>
             </nav>
 
             <div class="sidebar-footer">
@@ -621,14 +617,14 @@
             <div class="app-container">
                 <header class="main-header">
                     <div class="header-left">
-                        <h1 class="page-title">Relacionamento (Pipeline Calmo)</h1>
+                        <h1 class="page-title">Relacionamento (Pipeline Dezoito K)</h1>
                     </div>
                 </header>
 
                 <div class="board-controls"
                     style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 20px; flex-wrap: wrap;">
                     <div class="pipeline-selector">
-                        <button class="pipeline-btn" id="btn-pipeline-cacife" onclick="switchPipeline('cacife')">Calmo
+                        <button class="pipeline-btn" id="btn-pipeline-dezoito" onclick="switchPipeline('cacife')">Calmo
                             Brand</button>
                         <button class="pipeline-btn active" id="btn-pipeline-abandoned"
                             onclick="switchPipeline('abandoned')">Carrinhos Abandonados</button>
@@ -698,7 +694,7 @@
 
                 <footer class="main-footer"
                     style="margin-top: 60px; padding: 40px 0; border-top: 1px solid var(--border-color); text-align: center; color: var(--text-muted); font-size: 14px;">
-                    <p>© 2024 Calmo Store. Todos os direitos reservados.</p>
+                    <p>© 2024 Dezoito K. Todos os direitos reservados.</p>
                 </footer>
             </div>
         </div>
@@ -786,7 +782,7 @@
     <script>
         const PIPELINES = {
             cacife: {
-                name: "Calmo Store",
+                name: "Dezoito K",
                 stages: ["Novo Pedido", "A Enviar", "Enviados", "Entregues", "Cancelados", "Trocas e Devoluções", "Suporte Humanizado"]
             },
             abandoned: {
@@ -942,7 +938,7 @@
 
             if (lead.isAbandoned) {
                 document.getElementById('wa-action-box').style.display = 'block';
-                const msg = `Olá ${lead.name}, tudo bem? Vi que você deixou itens no carrinho da Calmo Store. Use o cupom CALMO05 para 5% OFF! Link: ${lead.checkoutUrl || ''}`;
+                const msg = `Olá ${lead.name}, tudo bem? Vi que você deixou itens no carrinho da Dezoito K. Use o cupom CALMO05 para 5% OFF! Link: ${lead.checkoutUrl || ''}`;
                 document.getElementById('modal-wa-link').href = `https://wa.me/${lead.phone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`;
             } else {
                 document.getElementById('wa-action-box').style.display = 'none';

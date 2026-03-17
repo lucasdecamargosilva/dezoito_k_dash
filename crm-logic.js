@@ -24,7 +24,7 @@ async function fetchCrmData(pipelineName = 'starter') {
 
             while (hasMore) {
                 const { data, error } = await crmClient
-                    .from('abandoned_checkouts_calmo')
+                    .from('abandoned_checkouts_dezoito')
                     .select('*')
                     .order('created_at', { ascending: false })
                     .range(from, to);
@@ -210,7 +210,7 @@ async function updateLeadStage(leadId, newStage, isAbandoned = false) {
             }
 
             const { error } = await crmClient
-                .from('abandoned_checkouts_calmo')
+                .from('abandoned_checkouts_dezoito')
                 .update(updateObj)
                 .eq('id', leadId);
 
@@ -244,7 +244,7 @@ async function batchUpdateLeadStages(leadIds, newStage, isAbandoned = false) {
             else if (newStage === 'Carrinho Abandonado') { updateObj.stage_recuperacao = ''; updateObj.recovered_at = null; }
 
             const { error } = await crmClient
-                .from('abandoned_checkouts_calmo')
+                .from('abandoned_checkouts_dezoito')
                 .update(updateObj)
                 .in('id', leadIds);
             if (error) throw error;

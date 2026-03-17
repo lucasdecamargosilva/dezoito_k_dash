@@ -1,0 +1,65 @@
+{
+  "name": "Nuvemshop - Carrinhos Abandonados (Webhook Tempo Real)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "nuvemshop-checkouts",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "b2c3d4e5-0002-0002-0001-b2c3d4e5f6a1",
+      "name": "Webhook Carrinhos",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "webhookId": "nuvemshop-checkouts-wh"
+    },
+    {
+      "parameters": {
+        "jsCode": "const checkout = $input.first().json.body;\nconst payment = checkout.payment_details || {};\n\nreturn [{\n  json: {\n    id: checkout.id,\n    nuvemshop_id: String(checkout.id),\n    token: checkout.token || null,\n    store_id: checkout.store_id || null,\n    abandoned_checkout_url: checkout.abandoned_checkout_url || null,\n    contact_email: checkout.contact_email || '',\n    contact_name: checkout.contact_name || '',\n    contact_phone: checkout.contact_phone || '',\n    contact_identification: checkout.contact_identification || '',\n    contact_accepts_marketing: checkout.contact_accepts_marketing || false,\n    contact_accepts_marketing_updated_at: checkout.contact_accepts_marketing_updated_at || null,\n    shipping_name: checkout.shipping_name || '',\n    shipping_phone: checkout.shipping_phone || '',\n    shipping_address: checkout.shipping_address || '',\n    shipping_number: checkout.shipping_number || '',\n    shipping_floor: checkout.shipping_floor || '',\n    shipping_locality: checkout.shipping_locality || '',\n    shipping_zipcode: checkout.shipping_zipcode || '',\n    shipping_city: checkout.shipping_city || '',\n    shipping_province: checkout.shipping_province || '',\n    shipping_country: checkout.shipping_country || '',\n    billing_name: checkout.billing_name || '',\n    billing_phone: checkout.billing_phone || '',\n    billing_address: checkout.billing_address || '',\n    billing_number: checkout.billing_number || '',\n    billing_floor: checkout.billing_floor || '',\n    billing_locality: checkout.billing_locality || '',\n    billing_zipcode: checkout.billing_zipcode || '',\n    billing_city: checkout.billing_city || '',\n    billing_province: checkout.billing_province || '',\n    billing_country: checkout.billing_country || '',\n    subtotal: parseFloat(checkout.subtotal) || 0,\n    discount: parseFloat(checkout.discount) || 0,\n    discount_coupon: parseFloat(checkout.discount_coupon) || null,\n    discount_gateway: parseFloat(checkout.discount_gateway) || null,\n    total: parseFloat(checkout.total) || 0,\n    total_usd: parseFloat(checkout.total_usd) || null,\n    currency: checkout.currency || 'BRL',\n    weight: parseFloat(checkout.weight) || null,\n    payment_status: checkout.payment_status || '',\n    payment_method: payment.method || '',\n    payment_installments: payment.installments ? parseInt(payment.installments) : null,\n    payment_credit_card_company: payment.credit_card_company || null,\n    gateway: checkout.gateway || '',\n    gateway_name: checkout.gateway_name || '',\n    checkout_enabled: checkout.checkout_enabled || false,\n    checkout_bot_suspect: checkout.checkout_bot_suspect || false,\n    has_stock_available: checkout.has_stock_available || null,\n    was_notified: checkout.was_notified || false,\n    language: checkout.language || '',\n    storefront: checkout.storefront || null,\n    same_billing_and_shipping_address: checkout.same_billing_and_shipping_address || false,\n    utm_source: checkout.utm_source || null,\n    utm_medium: checkout.utm_medium || null,\n    utm_campaign: checkout.utm_campaign || null,\n    utm_content: checkout.utm_content || null,\n    utm_term: checkout.utm_term || null,\n    landing_page: checkout.landing_page || null,\n    customer_visit_created_at: checkout.customer_visit_created_at || null,\n    created_at: checkout.created_at || null,\n    updated_at: checkout.updated_at || null,\n    completed_at: checkout.completed_at || null,\n    owner_note: checkout.owner_note || null,\n    order_origin: checkout.order_origin || null\n  }\n}];"
+      },
+      "id": "b2c3d4e5-0002-0002-0002-b2c3d4e5f6a1",
+      "name": "Mapear Carrinho",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://jytsrxrmgvliyyuktxsd.supabase.co/rest/v1/abandoned_checkouts_dezoito?on_conflict=nuvemshop_id",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "COLE_SERVICE_ROLE_KEY_AQUI" },
+            { "name": "Authorization", "value": "Bearer COLE_SERVICE_ROLE_KEY_AQUI" },
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Prefer", "value": "resolution=merge-duplicates,return=minimal" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "string",
+        "body": "={{ JSON.stringify([$input.first().json]) }}",
+        "options": {}
+      },
+      "id": "b2c3d4e5-0002-0002-0003-b2c3d4e5f6a1",
+      "name": "Supabase - Upsert Carrinho",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [710, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Carrinhos": {
+      "main": [[{ "node": "Mapear Carrinho", "type": "main", "index": 0 }]]
+    },
+    "Mapear Carrinho": {
+      "main": [[{ "node": "Supabase - Upsert Carrinho", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "tags": []
+}
