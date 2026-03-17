@@ -87,25 +87,29 @@ try {
 
     // --- Proxy Reverso Híbrido para Chatwoot ---
     // Todas as rotas que não foram capturadas acima serão enviadas ao Chatwoot
-    app.use('/', createProxyMiddleware({
-        target: process.env.CHATWOOT_URL,
-        changeOrigin: true,
-        ws: true, // Suporte a WebSockets
-        onProxyRes: (proxyRes) => {
-            // Remove headers restritivos de segurança para permitir o Iframe
-            delete proxyRes.headers['x-frame-options'];
-            delete proxyRes.headers['content-security-policy'];
-            delete proxyRes.headers['content-security-policy-report-only'];
+    if (process.env.CHATWOOT_URL) {
+        app.use('/', createProxyMiddleware({
+            target: process.env.CHATWOOT_URL,
+            changeOrigin: true,
+            ws: true, // Suporte a WebSockets
+            onProxyRes: (proxyRes) => {
+                // Remove headers restritivos de segurança para permitir o Iframe
+                delete proxyRes.headers['x-frame-options'];
+                delete proxyRes.headers['content-security-policy'];
+                delete proxyRes.headers['content-security-policy-report-only'];
 
-            // Adiciona permissões
-            proxyRes.headers['X-Frame-Options'] = 'ALLOWALL';
-            proxyRes.headers['Access-Control-Allow-Origin'] = '*';
-        },
-        onError: (err, req, res) => {
-            console.error('❌ Erro no Proxy:', err.message);
-            res.status(500).send('Erro ao conectar com o servidor de chat');
-        }
-    }));
+                // Adiciona permissões
+                proxyRes.headers['X-Frame-Options'] = 'ALLOWALL';
+                proxyRes.headers['Access-Control-Allow-Origin'] = '*';
+            },
+            onError: (err, req, res) => {
+                console.error('❌ Erro no Proxy:', err.message);
+                res.status(500).send('Erro ao conectar com o servidor de chat');
+            }
+        }));
+    } else {
+        console.log('ℹ️ CHATWOOT_URL não configurado — proxy desabilitado');
+    }
 
     // Iniciar o servidor
     app.listen(PORT, async () => {
