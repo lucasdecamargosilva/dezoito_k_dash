@@ -182,11 +182,14 @@ async function syncOrders() {
     let page = 1;
     let synced = 0;
 
-    console.log('🔄 [Nuvemshop] Syncing orders...');
+    const since = new Date();
+    since.setDate(since.getDate() - 30);
+
+    console.log('🔄 [Nuvemshop] Syncing orders (last 30 days)...');
     while (true) {
         const { data } = await axios.get(`${BASE_URL}/orders`, {
             headers: HEADERS,
-            params: { page, per_page: 200 }
+            params: { page, per_page: 200, created_at_min: since.toISOString() }
         });
 
         if (!data || data.length === 0) break;
@@ -210,11 +213,14 @@ async function syncCheckouts() {
     let page = 1;
     let synced = 0;
 
-    console.log('🔄 [Nuvemshop] Syncing abandoned checkouts...');
+    const since = new Date();
+    since.setDate(since.getDate() - 30);
+
+    console.log('🔄 [Nuvemshop] Syncing abandoned checkouts (last 30 days)...');
     while (true) {
         const { data } = await axios.get(`${BASE_URL}/checkouts`, {
             headers: HEADERS,
-            params: { page, per_page: 200 }
+            params: { page, per_page: 200, created_at_min: since.toISOString() }
         });
 
         if (!data || data.length === 0) break;
