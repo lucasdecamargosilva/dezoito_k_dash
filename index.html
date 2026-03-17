@@ -1437,7 +1437,16 @@
         function renderRegionChart(orders) {
             const regionMap = {};
             orders.forEach(o => {
-                let city = o.shipping_city || 'Desconhecido';
+                let city = '';
+                // shipping_address pode ser JSON string com city/province
+                if (o.shipping_address) {
+                    try {
+                        const addr = typeof o.shipping_address === 'string' ? JSON.parse(o.shipping_address) : o.shipping_address;
+                        city = addr.city || '';
+                    } catch(e) {}
+                }
+                if (!city) city = o.shipping_city || 'Desconhecido';
+                if (!city || city === 'Desconhecido') return;
                 regionMap[city] = (regionMap[city] || 0) + 1;
             });
 
