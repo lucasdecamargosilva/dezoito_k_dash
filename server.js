@@ -112,16 +112,22 @@ try {
     }
 
     // Iniciar o servidor
-    app.listen(PORT, async () => {
+    app.listen(PORT, () => {
         console.log('--------------------------------------------------');
         console.log(`✅ Servidor Rodando na Porta: ${PORT}`);
         console.log(`🌍 Dashboard: http://localhost:${PORT}`);
-        console.log(`💬 Chatwoot Tunnel: ${process.env.CHATWOOT_URL}`);
+        console.log(`💬 Chatwoot Tunnel: ${process.env.CHATWOOT_URL || 'desabilitado'}`);
         console.log('--------------------------------------------------');
 
-        // Nuvemshop: sync histórico inicial + registro de webhooks apontando para o n8n
-        await runStartupSync();
-        await registerWebhooks();
+        // Nuvemshop: sync em background (não bloqueia o startup)
+        setTimeout(async () => {
+            try {
+                await runStartupSync();
+                await registerWebhooks();
+            } catch (err) {
+                console.error('❌ [Nuvemshop] Erro no sync em background:', err.message);
+            }
+        }, 5000);
     });
 
 } catch (e) {
