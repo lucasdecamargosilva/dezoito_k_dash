@@ -107,9 +107,16 @@ function mapOrder(order) {
 
 function mapCheckout(checkout) {
     const payment = checkout.payment_details || {};
+    const lineItems = checkout.products || [];
+    const productName = lineItems.map(p => {
+        const name = p.name;
+        if (typeof name === 'object') return name.pt || name.es || name.en || Object.values(name)[0] || '';
+        return name || '';
+    }).filter(Boolean).join(', ');
     return {
         id: checkout.id,
         nuvemshop_id: String(checkout.id),
+        product_name: productName || null,
         token: checkout.token || null,
         store_id: checkout.store_id || null,
         abandoned_checkout_url: checkout.abandoned_checkout_url || null,
